@@ -99,7 +99,7 @@ export default async function EcServicePage() {
                   </div>
                   <div className="w-full md:w-1/2 relative">
                       <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl border border-gray-100 bg-white">
-                          <img src="https://placehold.jp/eeeeee/cccccc/800x600.png?text=EC+Store+Image" alt="ECサイト構築イメージ" className="w-full h-full object-cover" />
+                          <img src="../img_ec.png" alt="ECサイト構築イメージ" className="w-full h-full object-cover" />
                       </div>
                   </div>
               </div>

@@ -60,7 +60,7 @@ export default function Header() {
           {/* PC Navigation */}
           <nav className="hidden md:flex items-center gap-8 text-xs md:text-sm font-bold text-gray-500 font-en">
             <Link href="/about" className="hover:text-melon-dark transition-colors relative group">
-                ABOUT
+                会社案内
             </Link>
 
             {/* ★ PC用メガメニューのトリガー */}
@@ -73,7 +73,7 @@ export default function Header() {
                 href="/service"
                 className="hover:text-melon-dark transition-colors relative group flex items-center gap-1 py-4"
               >
-                SERVICE <i className={`fas fa-chevron-down text-[10px] transition-transform duration-300 ${isMegaMenuOpen ? "rotate-180" : ""}`}></i>
+                サービス <i className={`fas fa-chevron-down text-[10px] transition-transform duration-300 ${isMegaMenuOpen ? "rotate-180" : ""}`}></i>
               </Link>
               
               {/* ★ メガメニュー本体 */}
@@ -104,11 +104,11 @@ export default function Header() {
             </div>
 
             <Link href="/articles" className="hover:text-melon-dark transition-colors relative group">
-                ARTICLES
+                事例
             </Link>
             
             <Link href="/contact" className="bg-melon-dark text-white px-5 py-2 md:px-6 md:py-2 rounded-full hover:bg-melon hover:shadow-lg transition-all transform hover:-translate-y-0.5 text-[10px] md:text-xs tracking-wider">
-                CONTACT
+                お問い合わせ
             </Link>
           </nav>
         </div>

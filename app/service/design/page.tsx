@@ -87,13 +87,12 @@ export default async function DesignServicePage() {
                   <div className="w-full md:w-1/2">
                       <span className="text-melon-dark font-bold tracking-widest font-en text-xs uppercase mb-4 block">CREATIVE DESIGN</span>
                       <h1 className="text-3xl md:text-5xl font-bold text-[#264653] leading-tight mb-6">
-                          「伝わる」デザインで、<br />
+                          「伝わる」デザインで、
                           <span className="relative inline-block">
                             現場の熱量
                             <span className="absolute bottom-1 left-0 w-full h-3 bg-melon-light/40 -z-10"></span>
                           </span>
-                          を<br />
-                          カタチにする。
+                          をカタチにする。
                       </h1>
                       <p className="text-gray-600 text-sm md:text-base leading-relaxed mb-8 font-medium">
                           フライヤー、パンフレット、名刺から営業資料まで。<br />
@@ -103,7 +102,7 @@ export default async function DesignServicePage() {
                   </div>
                   <div className="w-full md:w-1/2 relative">
                       <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl border border-gray-100 bg-white">
-                          <img src="https://placehold.jp/eeeeee/cccccc/800x600.png?text=Graphic+Design" alt="デザイン制作イメージ" className="w-full h-full object-cover" />
+                          <img src="../img_design.png" alt="デザイン制作イメージ" className="w-full h-full object-cover" />
                       </div>
                   </div>
               </div>

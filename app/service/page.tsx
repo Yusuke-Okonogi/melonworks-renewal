@@ -1,6 +1,6 @@
 import Link from "next/link";
 import StickyBottomNav from "@/components/StickyBottomNav";
-import PageHeader from "@/components/PageHeader"; // ★追加
+import PageHeader from "@/components/PageHeader";
 
 export default function ServiceIndexPage() {
   
@@ -47,12 +47,12 @@ export default function ServiceIndexPage() {
   return (
     <main className="bg-white min-h-screen pt-14 md:pt-16 pb-20 font-sans">
         
-        {/* ★共通ヘッダーを使用 */}
+        {/* 共通ヘッダー */}
         <PageHeader 
             titleEn="SERVICE"
             titleJp="提供サービス"
             breadcrumbs={[
-                { name: "SERVICE" } // 現在地のみ
+                { name: "SERVICE" }
             ]}
         />
 
@@ -95,22 +95,26 @@ export default function ServiceIndexPage() {
                             
                             {/* 本文 */}
                             <div className="mb-4 relative z-10">
-                                <p className="text-xs md:text-sm text-gray-500 font-medium leading-relaxed whitespace-pre-wrap">
+                                {/* ★修正: text-xs -> text-sm */}
+                                <p className="text-sm text-gray-500 font-medium leading-relaxed whitespace-pre-wrap">
                                     {s.desc}
                                 </p>
                             </div>
                             
                             {/* 関連タグ */}
                             <div className="pt-3 border-t border-gray-50 w-full relative z-10">
-                                <p className="text-[9px] text-gray-400 font-bold mb-2">関連タグ</p>
+                                {/* ★修正: text-[9px] -> text-xs */}
+                                <p className="text-xs text-gray-400 font-bold mb-2">関連タグ</p>
                                 <div className="flex flex-wrap gap-1.5">
                                     {s.pTags.map((tag, idx) => (
-                                        <span key={`p-${idx}`} className="text-[#E76F51] border border-red-50 bg-red-50/50 text-[9px] font-bold px-1.5 py-0.5 rounded backdrop-blur-sm">
+                                        /* ★修正: text-[9px] -> text-xs, padding調整 */
+                                        <span key={`p-${idx}`} className="text-[#E76F51] border border-red-50 bg-red-50/50 text-xs font-bold px-2 py-1 rounded backdrop-blur-sm">
                                             {tag}
                                         </span>
                                     ))}
                                     {s.sTags.map((tag, idx) => (
-                                        <span key={`s-${idx}`} className="text-melon-dark border border-melon/10 bg-melon-light/20 text-[9px] font-bold px-1.5 py-0.5 rounded backdrop-blur-sm">
+                                        /* ★修正: text-[9px] -> text-xs, padding調整 */
+                                        <span key={`s-${idx}`} className="text-melon-dark border border-melon/10 bg-melon-light/20 text-xs font-bold px-2 py-1 rounded backdrop-blur-sm">
                                             {tag}
                                         </span>
                                     ))}
