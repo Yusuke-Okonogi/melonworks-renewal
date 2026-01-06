@@ -116,8 +116,18 @@ export default async function Home() {
       {/* FV Section */}
       <section className="bg-[#FAFAFA] relative lg:h-[calc(100vh-64px)] min-h-[600px] flex flex-col justify-center py-10 lg:py-0">
           <div className="absolute inset-0 z-0 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(38, 70, 83, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(38, 70, 83, 0.05) 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
-          <div className="absolute right-[-10%] top-10 lg:top-[10%] w-[90%] lg:w-[50%] h-[50%] lg:h-[80%] z-0 pointer-events-none">
-              <img src="/fv-illustration.png" alt="DX Illustration" className="w-full h-full object-contain object-right-top opacity-30 lg:opacity-90" />
+          <div className="absolute
+right-[-40%]
+lg:right-[-10%]
+top-10
+lg:top-[10%]
+w-[90%]
+lg:w-[50%]
+h-[50%]
+lg:h-[80%]
+z-0
+pointer-events-none">
+              <img src="/fv-illustration.png" alt="DX Illustration" className="w-full h-full object-contain object-right-top opacity-80 lg:opacity-80" />
           </div>
           <div className="absolute right-0 bottom-0 w-[600px] h-[600px] bg-melon-light/30 rounded-full blur-[120px] pointer-events-none translate-x-1/3 translate-y-1/3 z-0"></div>
 
@@ -128,12 +138,27 @@ export default async function Home() {
                       <p className="text-melon-dark font-bold tracking-widest font-en text-xs uppercase">DX & Creative Partner</p>
                   </div>
                   <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold font-en leading-tight mb-4 lg:mb-6 text-[#264653] tracking-tight">Less is more</h1>
-                  <p className="text-gray-600 text-xs sm:text-sm md:text-base leading-relaxed mb-6 font-medium max-w-lg">ありふれた情報・モノの中でシンプルに考え、<br />シンプルに行動。そして豊かに。</p>
-                  <div className="flex flex-wrap gap-2 mb-8">
-                      <span className="bg-white border border-gray-200 text-gray-500 text-[10px] font-bold px-3 py-1 rounded-full shadow-sm flex items-center gap-1"><i className="fas fa-palette text-melon-dark/50"></i> デザイン</span>
-                      <span className="bg-white border border-gray-200 text-gray-500 text-[10px] font-bold px-3 py-1 rounded-full shadow-sm flex items-center gap-1"><i className="fas fa-laptop-code text-melon-dark/50"></i> Web制作</span>
-                      <span className="bg-white border border-gray-200 text-gray-500 text-[10px] font-bold px-3 py-1 rounded-full shadow-sm flex items-center gap-1"><i className="fas fa-store text-melon-dark/50"></i> EC構築</span>
-                      <span className="bg-white border border-gray-200 text-gray-500 text-[10px] font-bold px-3 py-1 rounded-full shadow-sm flex items-center gap-1"><i className="fas fa-rocket text-melon-dark/50"></i> SaaS導入</span>
+                  <p className="text-gray-600 text-s sm:text-sm md:text-base leading-relaxed mb-6 font-medium max-w-lg">ありふれた情報・モノの中でシンプルに考え、<br />シンプルに行動。そして豊かに。</p>
+                    <div className="flex flex-wrap gap-2 mb-8">
+                      {/* 業務設計・DX支援 */}
+                      <Link href="/service/dx" className="bg-white border border-gray-200 text-gray-500 text-[12px] font-bold px-3 py-1 rounded-full shadow-sm flex items-center gap-1 hover:border-melon-dark hover:text-melon-dark transition-colors">
+                          <i className="fas fa-shapes text-melon-dark/50"></i> 業務設計・DX支援
+                      </Link>
+
+                      {/* Web制作 */}
+                      <Link href="/service/web" className="bg-white border border-gray-200 text-gray-500 text-[12px] font-bold px-3 py-1 rounded-full shadow-sm flex items-center gap-1 hover:border-melon-dark hover:text-melon-dark transition-colors">
+                          <i className="fas fa-laptop-code text-melon-dark/50"></i> Web制作
+                      </Link>
+
+                      {/* EC構築 */}
+                      <Link href="/service/ec" className="bg-white border border-gray-200 text-gray-500 text-[12px] font-bold px-3 py-1 rounded-full shadow-sm flex items-center gap-1 hover:border-melon-dark hover:text-melon-dark transition-colors">
+                          <i className="fas fa-store text-melon-dark/50"></i> EC構築
+                      </Link>
+                      
+                      {/* SaaS導入 (DXページへ遷移、もしくはデザインなら /service/design へ) */}
+                      <Link href="/service/design" className="bg-white border border-gray-200 text-gray-500 text-[12px] font-bold px-3 py-1 rounded-full shadow-sm flex items-center gap-1 hover:border-melon-dark hover:text-melon-dark transition-colors">
+                          <i className="fas fa-rocket text-melon-dark/50"></i> デザイン制作
+                      </Link>
                   </div>
                   <div className="flex gap-3">
                       <button className="w-10 h-10 lg:w-12 lg:h-12 rounded-full border border-gray-200 bg-white flex items-center justify-center text-gray-600 hover:border-melon-dark hover:text-melon-dark transition-all shadow-sm"><i className="fas fa-chevron-left text-sm lg:text-base"></i></button>
