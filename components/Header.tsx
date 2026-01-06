@@ -1,0 +1,175 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+export default function Header() {
+  const [isOpen, setIsOpen] = useState(false); // スマホメニューの開閉
+  const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false); // PCメガメニューの開閉
+  const pathname = usePathname();
+
+  const toggleMenu = () => setIsOpen(!isOpen);
+  const closeMenu = () => setIsOpen(false);
+
+  // ページ遷移時にメニューを閉じる
+  useEffect(() => {
+    setIsOpen(false);
+    setIsMegaMenuOpen(false);
+  }, [pathname]);
+
+  // サービスメニューのデータ
+  const services = [
+    {
+      title: "業務設計・DX支援",
+      path: "/service/dx",
+      icon: "fas fa-shapes",
+      desc: "業務フローの可視化とシステム導入支援",
+    },
+    {
+      title: "Webサイト制作",
+      path: "/service/web",
+      icon: "fas fa-laptop-code",
+      desc: "更新しやすく、成果が出るWebサイト",
+    },
+    {
+      title: "ECサイト構築・運用",
+      path: "/service/ec",
+      icon: "fas fa-store",
+      desc: "Shopify構築とバックヤード支援",
+    },
+    {
+      title: "デザイン制作",
+      path: "/service/design",
+      icon: "fas fa-palette",
+      desc: "Webと紙を一貫させるブランディング",
+    },
+  ];
+
+  return (
+    <>
+      {/* Header (Desktop & Mobile Top Bar) */}
+      <header className="bg-white/90 backdrop-blur-sm fixed w-full z-50 transition-all duration-300 border-b border-gray-100 top-0">
+        <div className="container mx-auto px-4 md:px-6 max-w-6xl h-14 md:h-16 flex items-center justify-between">
+          
+          {/* ロゴ */}
+          <Link href="/" className="flex items-center gap-3 group opacity-90 hover:opacity-100 transition-opacity" onClick={closeMenu}>
+            <img src="/logo-gr.png" alt="Melon Works" className="h-4 md:h-5 w-auto" />
+          </Link>
+
+          {/* PC Navigation */}
+          <nav className="hidden md:flex items-center gap-8 text-xs md:text-sm font-bold text-gray-500 font-en">
+            <Link href="/about" className="hover:text-melon-dark transition-colors relative group">
+                ABOUT
+            </Link>
+
+            {/* ★ PC用メガメニューのトリガー */}
+            <div
+              className="relative group h-full flex items-center"
+              onMouseEnter={() => setIsMegaMenuOpen(true)}
+              onMouseLeave={() => setIsMegaMenuOpen(false)}
+            >
+              <Link
+                href="/service"
+                className="hover:text-melon-dark transition-colors relative group flex items-center gap-1 py-4"
+              >
+                SERVICE <i className={`fas fa-chevron-down text-[10px] transition-transform duration-300 ${isMegaMenuOpen ? "rotate-180" : ""}`}></i>
+              </Link>
+              
+              {/* ★ メガメニュー本体 */}
+              <div
+                className={`
+                    absolute top-full 
+                    right-0 w-[520px] 
+                    lg:left-1/2 lg:-translate-x-1/2 lg:right-auto lg:w-[600px]
+                    bg-white border border-gray-100 shadow-xl rounded-b-xl overflow-hidden transition-all duration-300 origin-top 
+                    ${isMegaMenuOpen ? "opacity-100 visible max-h-[400px]" : "opacity-0 invisible max-h-0"}
+                `}
+              >
+                <div className="p-6 grid grid-cols-2 gap-4 bg-white">
+                    {services.map((s, i) => (
+                        <Link key={i} href={s.path} className="flex gap-4 p-3 rounded-lg hover:bg-melon-light/10 transition-colors group/item">
+                            <div className="w-10 h-10 bg-gray-50 rounded-lg flex items-center justify-center text-melon-dark text-lg group-hover/item:bg-melon-dark group-hover/item:text-white transition-colors flex-shrink-0">
+                                <i className={s.icon}></i>
+                            </div>
+                            <div>
+                                <h4 className="font-bold text-[#264653] text-sm mb-0.5">{s.title}</h4>
+                                <p className="text-[10px] text-gray-400 leading-tight">{s.desc}</p>
+                            </div>
+                        </Link>
+                    ))}
+                    {/* サービス一覧を見るリンクを削除しました */}
+                </div>
+              </div>
+            </div>
+
+            <Link href="/articles" className="hover:text-melon-dark transition-colors relative group">
+                ARTICLES
+            </Link>
+            
+            <Link href="/contact" className="bg-melon-dark text-white px-5 py-2 md:px-6 md:py-2 rounded-full hover:bg-melon hover:shadow-lg transition-all transform hover:-translate-y-0.5 text-[10px] md:text-xs tracking-wider">
+                CONTACT
+            </Link>
+          </nav>
+        </div>
+      </header>
+
+      {/* ▼▼▼ Mobile Menu Overlay ▼▼▼ */}
+      <div 
+        className={`fixed inset-0 bg-[#F9FAFB]/95 backdrop-blur-md z-[60] flex flex-col justify-center items-center transition-all duration-300 ${
+            isOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'
+        }`}
+      >
+        <nav className="flex flex-col gap-6 text-center w-full max-w-xs pb-20 overflow-y-auto max-h-screen pt-10">
+            <Link href="/" onClick={closeMenu} className="text-xl font-bold text-[#264653] hover:text-melon-dark transition-colors font-en tracking-widest border-b border-gray-200 pb-2">
+                HOME
+            </Link>
+            <Link href="/about" onClick={closeMenu} className="text-xl font-bold text-[#264653] hover:text-melon-dark transition-colors font-en tracking-widest border-b border-gray-200 pb-2">
+                ABOUT
+            </Link>
+            
+            {/* モバイル用サービスメニュー */}
+            <div className="border-b border-gray-200 pb-4">
+                <p className="text-xl font-bold text-[#264653] font-en tracking-widest mb-4 opacity-50">SERVICE</p>
+                <div className="grid gap-3">
+                    {services.map((s, i) => (
+                        <Link key={i} href={s.path} onClick={closeMenu} className="text-sm font-bold text-gray-500 hover:text-melon-dark py-1 flex items-center justify-center gap-2">
+                            <i className={`${s.icon} text-melon-dark/50`}></i> {s.title}
+                        </Link>
+                    ))}
+                </div>
+            </div>
+
+            <Link href="/articles" onClick={closeMenu} className="text-xl font-bold text-[#264653] hover:text-melon-dark transition-colors font-en tracking-widest border-b border-gray-200 pb-2">
+                ARTICLES
+            </Link>
+            
+            <div className="pt-4">
+                <Link href="/contact" onClick={closeMenu} className="bg-melon-dark text-white px-10 py-3 rounded-full text-sm font-bold shadow-lg hover:shadow-xl transition-all inline-block">
+                    CONTACT
+                </Link>
+            </div>
+        </nav>
+      </div>
+
+      {/* ▼▼▼ Mobile Menu Button (Floating) ▼▼▼ */}
+      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[70] md:hidden">
+        <button 
+            onClick={toggleMenu}
+            className={`
+                px-6 py-2.5 rounded-full shadow-lg flex items-center gap-2 transition-all duration-300 border border-white/20 backdrop-blur-sm
+                ${isOpen 
+                    ? 'bg-gray-800 text-white hover:bg-gray-700'
+                    : 'bg-gradient-to-r from-[#264653] to-[#2A9D8F] text-white hover:scale-105 animate-pulse-glow'
+                }
+            `}
+        >
+            <i className={`fas ${isOpen ? 'fa-times' : 'fa-bars'} text-sm w-4 text-center transition-transform duration-300 ${isOpen ? 'rotate-90' : 'rotate-0'}`}></i>
+            <span className="font-bold text-xs font-en tracking-wider w-10 text-center">
+                {isOpen ? 'CLOSE' : 'MENU'}
+            </span>
+        </button>
+      </div>
+    </>
+  );
+}
