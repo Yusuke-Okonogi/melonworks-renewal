@@ -24,25 +24,21 @@ export default function Header() {
       title: "業務設計・DX支援",
       path: "/service/dx",
       icon: "fas fa-shapes",
-      desc: "DX Support", // 英語ラベル用に短い説明を追加
     },
     {
       title: "Webサイト制作",
       path: "/service/web",
       icon: "fas fa-laptop-code",
-      desc: "Web Production",
     },
     {
       title: "ECサイト構築",
       path: "/service/ec",
       icon: "fas fa-store",
-      desc: "EC Building",
     },
     {
       title: "デザイン制作",
       path: "/service/design",
       icon: "fas fa-palette",
-      desc: "Design Work",
     },
   ];
 
@@ -119,7 +115,7 @@ export default function Header() {
         </div>
       </header>
 
-      {/* ▼▼▼ Mobile Menu Overlay (タイル型メニュー) ▼▼▼ */}
+      {/* ▼▼▼ Mobile Menu Overlay (タイル型メニュー・圧縮版) ▼▼▼ */}
       <div 
         className={`fixed inset-0 bg-[#F9FAFB]/95 backdrop-blur-xl z-[40] flex flex-col items-center overflow-y-auto transition-all duration-500 ${
             isOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'
@@ -132,75 +128,66 @@ export default function Header() {
         {/* タイルグリッドコンテナ */}
         <nav className="relative z-10 w-full max-w-sm px-6 grid grid-cols-2 gap-3 pb-32 pt-24">
             
-            {/* 1. HOME & ABOUT */}
+            {/* 1. ホーム & 会社案内 */}
             <Link 
                 href="/" 
                 onClick={closeMenu}
-                className="aspect-[4/3] bg-white border border-gray-100 rounded-2xl flex flex-col items-center justify-center gap-1 shadow-sm hover:shadow-md active:scale-95 transition-all duration-300"
+                className="h-20 bg-white border border-gray-100 rounded-2xl flex flex-col items-center justify-center gap-1 shadow-sm hover:shadow-md active:scale-95 transition-all duration-300"
             >
-                <i className="fas fa-home text-xl text-melon-dark mb-1"></i>
-                <span className="font-bold text-[#264653] font-en text-base">HOME</span>
-                <span className="text-[10px] text-gray-400 font-bold">ホーム</span>
+                <i className="fas fa-home text-xl text-melon-dark"></i>
+                <span className="font-bold text-[#264653] text-sm">ホーム</span>
             </Link>
 
             <Link 
                 href="/about" 
                 onClick={closeMenu}
-                className="aspect-[4/3] bg-white border border-gray-100 rounded-2xl flex flex-col items-center justify-center gap-1 shadow-sm hover:shadow-md active:scale-95 transition-all duration-300"
+                className="h-20 bg-white border border-gray-100 rounded-2xl flex flex-col items-center justify-center gap-1 shadow-sm hover:shadow-md active:scale-95 transition-all duration-300"
             >
-                <i className="fas fa-users text-xl text-melon-dark mb-1"></i>
-                <span className="font-bold text-[#264653] font-en text-base">ABOUT</span>
-                <span className="text-[10px] text-gray-400 font-bold">私たちについて</span>
+                <i className="fas fa-users text-xl text-melon-dark"></i>
+                <span className="font-bold text-[#264653] text-sm">会社案内</span>
             </Link>
 
             {/* 2. SERVICES SECTION TITLE */}
-            <div className="col-span-2 flex items-center gap-2 mt-4 mb-1 pl-1 opacity-60">
+            <div className="col-span-2 flex items-center gap-2 mt-2 mb-1 pl-1 opacity-60">
                 <span className="h-[1px] w-4 bg-[#264653]"></span>
                 <span className="text-xs font-bold font-en text-[#264653] tracking-widest">SERVICES</span>
                 <span className="h-[1px] flex-grow bg-[#264653] opacity-20"></span>
             </div>
 
-            {/* 3. INDIVIDUAL SERVICES (4つ) */}
+            {/* 3. INDIVIDUAL SERVICES (4つ) - 高さを圧縮 */}
             {services.map((s, i) => (
                 <Link 
                     key={i}
                     href={s.path} 
                     onClick={closeMenu}
-                    className="aspect-square bg-white border border-gray-100 rounded-2xl flex flex-col items-center justify-center gap-2 shadow-sm hover:shadow-md active:scale-95 transition-all duration-300 relative overflow-hidden group"
+                    className="h-24 bg-white border border-gray-100 rounded-2xl flex flex-col items-center justify-center gap-2 shadow-sm hover:shadow-md active:scale-95 transition-all duration-300 relative overflow-hidden group px-1"
                 >
                     <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
-                        <i className={`${s.icon} text-4xl text-melon-dark`}></i>
+                        <i className={`${s.icon} text-3xl text-melon-dark`}></i>
                     </div>
                     <i className={`${s.icon} text-2xl text-melon-dark`}></i>
-                    <span className="font-bold text-[#264653] text-xs text-center px-1">{s.title}</span>
-                    <span className="text-[9px] text-gray-400 font-en uppercase tracking-wider">{s.desc}</span>
+                    <span className="font-bold text-[#264653] text-xs text-center leading-tight">{s.title}</span>
                 </Link>
             ))}
 
-            {/* 4. NEWS (Wide Tile) */}
+            {/* 4. 事例 (ARTICLES) */}
             <Link 
                 href="/articles" 
                 onClick={closeMenu}
-                className="col-span-2 bg-white border border-gray-100 rounded-2xl py-4 flex items-center justify-center gap-3 shadow-sm hover:shadow-md active:scale-95 transition-all duration-300 mt-4"
+                className="col-span-2 bg-white border border-gray-100 rounded-2xl py-4 flex items-center justify-center gap-2 shadow-sm hover:shadow-md active:scale-95 transition-all duration-300 mt-2"
             >
-                <i className="far fa-newspaper text-xl text-melon-dark"></i>
-                <div className="flex flex-col items-start leading-none">
-                    <span className="font-bold text-[#264653] font-en text-base">ARTICLES</span>
-                    <span className="text-[10px] text-gray-400 font-bold">事例・お知らせ</span>
-                </div>
+                <i className="far fa-newspaper text-lg text-melon-dark"></i>
+                <span className="font-bold text-[#264653] text-base">事例</span>
             </Link>
 
-            {/* 5. CONTACT (Main CTA) */}
+            {/* 5. お問い合わせ (CONTACT) */}
             <Link 
                 href="/contact" 
                 onClick={closeMenu}
-                className="col-span-2 bg-gradient-to-r from-[#264653] to-[#2A9D8F] text-white rounded-2xl py-5 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl active:scale-95 transition-all duration-300"
+                className="col-span-2 bg-gradient-to-r from-[#264653] to-[#2A9D8F] text-white rounded-2xl py-4 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl active:scale-95 transition-all duration-300"
             >
-                <i className="far fa-envelope text-xl"></i>
-                <div className="flex flex-col items-start leading-none">
-                    <span className="font-bold font-en text-lg">CONTACT</span>
-                    <span className="text-[10px] opacity-80">お問い合わせ</span>
-                </div>
+                <i className="far fa-envelope text-lg"></i>
+                <span className="font-bold text-base">お問い合わせ</span>
             </Link>
 
         </nav>
