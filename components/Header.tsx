@@ -53,7 +53,7 @@ export default function Header() {
         <div className="container mx-auto px-4 md:px-6 max-w-6xl h-14 md:h-16 flex items-center justify-between">
           
           {/* ロゴ */}
-          <Link href="/" className="flex items-center gap-3 group opacity-90 hover:opacity-100 transition-opacity" onClick={closeMenu}>
+          <Link href="/" className="relative z-50 flex items-center gap-3 group opacity-90 hover:opacity-100 transition-opacity" onClick={closeMenu}>
             <img src="/logo-gr.png" alt="Melon Works" className="h-4 md:h-5 w-auto" />
           </Link>
 
@@ -116,7 +116,7 @@ export default function Header() {
 
       {/* ▼▼▼ Mobile Menu Overlay ▼▼▼ */}
       <div 
-        className={`fixed inset-0 bg-[#F9FAFB]/95 backdrop-blur-md z-[60] flex flex-col justify-center items-center transition-all duration-300 ${
+        className={`fixed inset-0 bg-[#F9FAFB]/95 backdrop-blur-md z-[40] flex flex-col justify-center items-center transition-all duration-300 ${
             isOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'
         }`}
       >
@@ -157,7 +157,7 @@ export default function Header() {
         <button 
             onClick={toggleMenu}
             className={`
-                px-6 py-2.5 rounded-full shadow-lg flex items-center gap-2 transition-all duration-300 border border-white/20 backdrop-blur-sm
+                relative z-50 px-6 py-2.5 rounded-full shadow-lg flex items-center gap-2 transition-all duration-300 border border-white/20 backdrop-blur-sm
                 ${isOpen 
                     ? 'bg-gray-800 text-white hover:bg-gray-700'
                     : 'bg-gradient-to-r from-[#264653] to-[#2A9D8F] text-white hover:scale-105 animate-pulse-glow'
