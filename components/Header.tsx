@@ -49,7 +49,13 @@ export default function Header() {
   return (
     <>
       {/* Header (Desktop & Mobile Top Bar) */}
-      <header className="bg-white/90 backdrop-blur-sm fixed w-full z-50 transition-all duration-300 border-b border-gray-100 top-0">
+<header 
+      className={`fixed top-0 left-0 w-full z-50 h-14 md:h-16 flex items-center transition-all ${
+        isOpen 
+          ? 'bg-transparent border-none' // ★メニューオープン時は透明にして枠線を消す
+          : 'bg-white/90 backdrop-blur-md border-b border-gray-100' // 通常時は白背景＋ぼかし＋枠線
+      }`}
+    >
         <div className="container mx-auto px-4 md:px-6 max-w-6xl h-14 md:h-16 flex items-center justify-between">
           
           {/* ロゴ */}
