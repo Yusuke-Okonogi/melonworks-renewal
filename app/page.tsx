@@ -6,6 +6,16 @@ export const metadata: Metadata = {
   title: "メロンワークス合同会社 | 群馬・東京のDX支援・Web制作",
 };
 
+// ▼▼▼ サービス定義 (タグからの逆引き用) ▼▼▼
+const SERVICE_DEFINITIONS = [
+    { id: "dx", name: "業務設計・DX支援", path: "/service/dx" },
+    { id: "web", name: "Webサイト制作", path: "/service/web" },
+    { id: "ec", name: "ECサイト構築・運用", path: "/service/ec" },
+    { id: "design", name: "デザイン制作", path: "/service/design" },
+];
+
+// --- データ取得関数 ---
+
 // 1. 通常の新着記事を取得
 async function getNews() {
   const data = await client.get({ 
@@ -28,7 +38,7 @@ async function getPickupArticles() {
   return data.contents;
 }
 
-// 3. タグ一覧を取得
+// 3. 全タグ情報を取得
 async function getTags() {
   try {
     const data = await client.get({ 
@@ -48,22 +58,42 @@ const getTagName = (tag: any) => {
   return tag.name || tag.tag || tag.label || "";
 };
 
-const getCategoryName = (cat: any) => {
-    if (!cat) return "お知らせ";
-    if (Array.isArray(cat)) return cat[0] ? (cat[0].name || cat[0]) : "お知らせ";
-    if (typeof cat === 'object') return cat.name || "お知らせ";
-    return cat;
-};
-
 const formatDate = (dateStr: string) => {
     const d = new Date(dateStr);
     return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`;
 };
 
+// ★追加: カテゴリ名決定ロジック (タグからサービスを逆引き)
+const getDisplayCategory = (article: any, allTags: any[]) => {
+    // 1. カテゴリが明示的に設定されていればそれを優先
+    if (article.category) {
+        if (Array.isArray(article.category) && article.category[0]) return article.category[0].name;
+        if (typeof article.category === 'object') return article.category.name;
+    }
+
+    // 2. カテゴリがない場合、記事のタグを見てサービスを推定
+    const articleTags = [
+        ...(article.problem_tags || []),
+        ...(article.solution_tags || [])
+    ];
+    const articleTagNames = articleTags.map(t => getTagName(t));
+
+    for (const tagName of articleTagNames) {
+        const tagData = allTags.find((t: any) => t.name === tagName);
+        if (tagData && tagData.related_services && tagData.related_services.length > 0) {
+            const serviceId = tagData.related_services[0]; 
+            const service = SERVICE_DEFINITIONS.find(s => s.id === serviceId);
+            if (service) return service.name;
+        }
+    }
+
+    return "お知らせ";
+};
+
 export default async function Home() {
   const [news, pickups, allTags] = await Promise.all([getNews(), getPickupArticles(), getTags()]);
 
-  // ▼▼▼ タグの振り分け処理 ▼▼▼
+  // タグの振り分け処理
   const getServiceTags = (serviceKey: string, type: "problem" | "solution") => {
     return allTags
       .filter((tag: any) => 
@@ -72,37 +102,23 @@ export default async function Home() {
       .map((tag: any) => tag.name);
   };
 
-  // 全体の検索用リスト（重複なしの全タグリスト）
   const searchProblemTags = allTags.filter((t: any) => t.type?.includes("problem")).map((t: any) => t.name);
   const searchSolutionTags = allTags.filter((t: any) => t.type?.includes("solution")).map((t: any) => t.name);
 
-  // HOW WE DO のデータ定義
+  // HOW WE DO データ
   const howWeDoItems = [
-    {
-      title: "現場から考える",
-      text: "机上の理屈ではなく、現場の流れ・負荷・クセを理解して改善します。",
-      icon: "store"
-    },
-    {
-      title: "続く仕組みづくり",
-      text: "設計・制作・運用まで、現場に根づく形を一緒につくります。",
-      icon: "sync-alt"
-    },
-    {
-      title: "人に合わせた設計",
-      text: "使い方を覚えさせるのではなく、自然に使える形を設計します。",
-      icon: "heart"
-    }
+    { title: "現場から考える", text: "机上の理屈ではなく、現場の流れ・負荷・クセを理解して改善します。", icon: "store" },
+    { title: "続く仕組みづくり", text: "設計・制作・運用まで、現場に根づく形を一緒につくります。", icon: "sync-alt" },
+    { title: "人に合わせた設計", text: "使い方を覚えさせるのではなく、自然に使える形を設計します。", icon: "heart" }
   ];
 
-  // サービスデータ (★修正: 各タグを最大3つまでに制限)
+  // サービスデータ
   const serviceItems = [
     { 
         id: "01",
         icon: "shapes", 
         title: "業務設計・DX支援", 
         desc: "業務の流れや情報の分断を整理し、\n現場に無理のない仕組みを設計します。\nツール選定から運用定着まで、一緒に支援します。",
-        // .slice(0, 3) を追加
         pTags: getServiceTags("dx", "problem").slice(0, 3), 
         sTags: getServiceTags("dx", "solution").slice(0, 3),
         href: "/service/dx" 
@@ -181,7 +197,10 @@ export default async function Home() {
                       {pickups.map((article: any) => {
                            const pTags = article.problem_tags ? (Array.isArray(article.problem_tags) ? article.problem_tags : [article.problem_tags]) : [];
                            const sTags = article.solution_tags ? (Array.isArray(article.solution_tags) ? article.solution_tags : [article.solution_tags]) : [];
-                           const categoryName = getCategoryName(article.category);
+                           
+                           // ★修正: カテゴリ名を自動判定
+                           const categoryName = getDisplayCategory(article, allTags);
+                           
                            return (
                               <div key={article.id} className="min-w-[260px] md:min-w-[320px] snap-center group relative overflow-hidden rounded-2xl shadow-md h-[260px] md:h-[300px] hover:-translate-y-1 transition-transform duration-300 bg-white flex-shrink-0">
                                   <Link href={`/article/${article.id}`} className="absolute inset-0 z-0 block" />
@@ -197,9 +216,16 @@ export default async function Home() {
                                   <div className="absolute bottom-0 p-5 z-10 w-full pointer-events-none">
                                       <time className="text-white text-xs font-en block mb-2 font-medium opacity-90 drop-shadow-sm">{formatDate(article.publishedAt || article.createdAt)}</time>
                                       <h3 className="font-bold text-lg md:text-xl leading-snug mb-3 text-white drop-shadow-md line-clamp-2">{article.title}</h3>
+                                      
+                                      {/* ★修正: 課題・解決策タグをそれぞれ最大1つずつ表示 */}
                                       <div className="flex flex-wrap gap-2">
-                                        {[...pTags, ...sTags].slice(0, 3).map((tag: any, i: number) => (
-                                            <span key={i} className={`bg-white text-xs font-bold px-2.5 py-1 rounded shadow-sm relative z-20 ${pTags.includes(tag) ? 'text-[#E76F51]' : 'text-melon-dark'}`}>
+                                        {pTags.slice(0, 1).map((tag: any, i: number) => (
+                                            <span key={`p-${i}`} className="bg-white text-[#E76F51] text-xs font-bold px-2.5 py-1 rounded shadow-sm relative z-20">
+                                                {getTagName(tag)}
+                                            </span>
+                                        ))}
+                                        {sTags.slice(0, 1).map((tag: any, i: number) => (
+                                            <span key={`s-${i}`} className="bg-white text-melon-dark text-xs font-bold px-2.5 py-1 rounded shadow-sm relative z-20">
                                                 {getTagName(tag)}
                                             </span>
                                         ))}
@@ -267,12 +293,10 @@ export default async function Home() {
               <div className="overflow-hidden bg-gray-100 grid grid-cols-1 md:grid-cols-2 gap-px shadow-sm rounded-2xl relative z-10">
                   {serviceItems.map((s, i) => (
                       <Link key={i} href={s.href} className="group bg-white p-6 md:p-8 flex flex-col items-start hover:bg-melon-light/5 transition-colors duration-500 relative overflow-hidden">
-                          {/* 背景アイコン透かし */}
                           <div className="absolute -bottom-6 -right-6 text-[120px] text-gray-50 group-hover:text-melon-light/10 group-hover:scale-110 group-hover:-rotate-12 transition-all duration-700 z-0 pointer-events-none">
                               <i className={`fas fa-${s.icon}`}></i>
                           </div>
 
-                          {/* ヘッダー */}
                           <div className="w-full flex items-center justify-between mb-4 relative z-10">
                                 <div className="flex items-center gap-4">
                                     <div className="text-2xl text-melon-dark group-hover:scale-110 transition-transform duration-300">
@@ -287,18 +311,15 @@ export default async function Home() {
                                 </div>
                           </div>
                           
-                          {/* 本文 */}
                           <div className="mb-4 relative z-10">
                               <p className="text-sm text-gray-500 font-medium leading-relaxed whitespace-pre-wrap">
                                   {s.desc}
                               </p>
                           </div>
                           
-                          {/* 関連タグ */}
                           <div className="pt-3 border-t border-gray-50 w-full relative z-10">
                                 <p className="text-xs text-gray-400 font-bold mb-2">関連タグ</p>
                                 <div className="flex flex-wrap gap-1.5">
-                                    {/* 自動取得したタグを表示 */}
                                     {s.pTags.map((tag: any, idx: number) => (
                                         <span key={`p-${idx}`} className="text-[#E76F51] border border-red-50 bg-red-50/50 text-xs font-bold px-2 py-1 rounded backdrop-blur-sm">
                                             {tag}
@@ -312,7 +333,6 @@ export default async function Home() {
                                 </div>
                           </div>
 
-                          {/* アクセントバー */}
                           <div className="absolute bottom-0 left-0 w-full h-[3px] bg-melon-dark transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left z-20"></div>
                       </Link>
                   ))}
@@ -330,7 +350,6 @@ export default async function Home() {
                   <p className="text-gray-500 mt-3 text-sm">あなたの現在の状況に合わせて、最適な解決策を探せます。</p>
               </div>
               
-              {/* 課題から探す */}
               <div className="bg-[#FAFAFA]/95 backdrop-blur-sm rounded-xl p-6 mb-6 border border-gray-100 hover:shadow-md transition-shadow relative">
                   <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
                       <div className="w-full md:w-48 flex-shrink-0 flex items-center justify-between md:justify-start gap-3">
@@ -347,7 +366,6 @@ export default async function Home() {
                   </div>
               </div>
 
-              {/* 解決策から探す */}
               <div className="bg-melon-light/95 backdrop-blur-sm rounded-xl p-6 border border-melon/20 hover:shadow-md transition-shadow relative">
                   <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
                       <div className="w-full md:w-48 flex-shrink-0 flex items-center justify-between md:justify-start gap-3">
@@ -380,8 +398,11 @@ export default async function Home() {
                       {news.map((article: any) => {
                           const pTags = article.problem_tags ? (Array.isArray(article.problem_tags) ? article.problem_tags : [article.problem_tags]) : [];
                           const sTags = article.solution_tags ? (Array.isArray(article.solution_tags) ? article.solution_tags : [article.solution_tags]) : [];
-                          const categoryName = getCategoryName(article.category);
+                          
+                          // ★修正: カテゴリ名を自動判定
+                          const categoryName = getDisplayCategory(article, allTags);
                           const categoryId = typeof article.category === 'object' ? article.category.id : null;
+                          
                           return (
                               <div key={article.id} className="group relative overflow-hidden rounded-2xl shadow-soft h-[320px] hover-lift block bg-white">
                                   <Link href={`/article/${article.id}`} className="absolute inset-0 z-0 block" />
@@ -399,13 +420,15 @@ export default async function Home() {
                                   <div className="absolute bottom-0 p-6 z-10 w-full pointer-events-none">
                                       <time className="text-white text-xs font-en block mb-2 font-medium opacity-90 drop-shadow-sm">{formatDate(article.publishedAt || article.createdAt)}</time>
                                       <h3 className="font-bold text-lg leading-snug mb-3 text-white drop-shadow-md line-clamp-2">{article.title}</h3>
+                                      
+                                      {/* ★修正: 課題・解決策タグをそれぞれ最大1つずつ表示 */}
                                       <div className="flex flex-wrap gap-2 pointer-events-auto">
-                                          {pTags.map((tag: any, i: number) => (
+                                          {pTags.slice(0, 1).map((tag: any, i: number) => (
                                               <Link key={`p-${i}`} href={`/search?tag=${encodeURIComponent(getTagName(tag))}`} className="bg-white text-[#E76F51] text-xs font-bold px-2.5 py-1 rounded shadow-sm border border-red-100 hover:shadow-md transition-all relative z-20">
                                                   {getTagName(tag)}
                                               </Link>
                                           ))}
-                                          {sTags.map((tag: any, i: number) => (
+                                          {sTags.slice(0, 1).map((tag: any, i: number) => (
                                               <Link key={`s-${i}`} href={`/search?tag=${encodeURIComponent(getTagName(tag))}`} className="bg-white text-melon-dark text-xs font-bold px-2.5 py-1 rounded shadow-sm border border-melon/20 hover:shadow-md transition-all relative z-20">
                                                   {getTagName(tag)}
                                               </Link>

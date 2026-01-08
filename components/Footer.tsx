@@ -40,7 +40,8 @@ export default async function Footer() {
   return (
     <div className="bg-[#F9FAFB] pt-10">
         
-        <footer className="bg-white rounded-t-[40px] md:rounded-t-[60px] shadow-[0_-10px_40px_rgba(0,0,0,0.02)] relative overflow-hidden pb-12">
+        {/* ★修正: スマホ時のみ下部余白を大きく確保 (pb-32 md:pb-12) */}
+        <footer className="bg-white rounded-t-[40px] md:rounded-t-[60px] shadow-[0_-10px_40px_rgba(0,0,0,0.02)] relative overflow-hidden pb-32 md:pb-12">
             
             {/* 背景装飾 */}
             <div className="absolute right-[-5%] bottom-[-20%] text-[200px] md:text-[300px] text-melon-light opacity-10 pointer-events-none rotate-12 z-0">
@@ -54,7 +55,6 @@ export default async function Footer() {
                     {/* 左側：ブランド & 会社情報 */}
                     <div className="lg:w-1/4 flex-shrink-0">
                         <Link href="/" className="inline-block mb-8 group shrink-0">
-                            {/* ロゴ修正: object-contain と height 指定で比率を維持 */}
                             <img 
                                 src="/logo-gr.png" 
                                 alt="Melon Works" 
@@ -62,7 +62,6 @@ export default async function Footer() {
                             />
                         </Link>
                         
-                        {/* 所在地情報 */}
                         <div className="text-xs text-gray-500 leading-loose font-medium space-y-6">
                             <div>
                                 <span className="inline-block bg-gray-100 text-gray-600 text-[10px] font-bold px-2 py-0.5 rounded mb-1">本社</span>
@@ -86,10 +85,10 @@ export default async function Footer() {
                         </div>
                     </div>
 
-                    {/* 右側：ナビゲーションリンク (TAGSを左に配置) */}
+                    {/* 右側：ナビゲーションリンク */}
                     <div className="lg:w-3/4 w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10">
                         
-                        {/* Column 1 & 2: TAGS (Issues & Solutions) - 2列分使用 */}
+                        {/* TAGS (Issues & Solutions) */}
                         <div className="lg:col-span-2">
                             <h4 className="font-bold mb-5 text-xs font-en tracking-widest text-[#264653] flex items-center gap-2">
                                 <span className="w-2 h-2 bg-melon-dark rounded-full"></span> TAGS
@@ -122,7 +121,7 @@ export default async function Footer() {
                             </div>
                         </div>
 
-                        {/* Column 3: SERVICE */}
+                        {/* SERVICE */}
                         <div>
                             <h4 className="font-bold mb-5 text-xs font-en tracking-widest text-[#264653] flex items-center gap-2">
                                 <span className="w-2 h-2 bg-gray-400 rounded-full"></span> SERVICE
@@ -139,14 +138,14 @@ export default async function Footer() {
                             </ul>
                         </div>
 
-                        {/* Column 4: COMPANY */}
+                        {/* COMPANY */}
                         <div>
                             <h4 className="font-bold mb-5 text-xs font-en tracking-widest text-[#264653] flex items-center gap-2">
                                 <span className="w-2 h-2 bg-gray-400 rounded-full"></span> COMPANY
                             </h4>
                             <ul className="space-y-3">
                                 {[
-                                    { name: "会社案内", path: "/about" },
+                                    { name: "会社概要", path: "/about" },
                                     { name: "お問い合わせ", path: "/contact" },
                                     { name: "利用規約", path: "/terms" },
                                     { name: "プライバシーポリシー", path: "/privacy" },
@@ -168,7 +167,7 @@ export default async function Footer() {
                 {/* Copyright */}
                 <div className="border-t border-gray-100 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
                     <p className="text-[10px] text-gray-400 font-en tracking-wider">
-                        &copy; 2025 Melon Works LLC.
+                        &copy; 2025 Melon Works LLC. All Rights Reserved.
                     </p>
                     <p className="text-[10px] text-gray-300 font-en hidden md:block">
                         Less is more.

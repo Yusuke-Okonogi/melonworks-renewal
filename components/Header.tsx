@@ -117,7 +117,7 @@ export default function Header() {
 
       {/* ▼▼▼ Mobile Menu Overlay (タイル型メニュー・圧縮版) ▼▼▼ */}
       <div 
-        className={`fixed inset-0 bg-[#F9FAFB]/95 backdrop-blur-xl z-[40] flex flex-col items-center overflow-y-auto transition-all duration-500 ${
+        className={`fixed inset-0 bg-[#F9FAFB]/95 backdrop-blur-xl z-[90] flex flex-col items-center overflow-y-auto transition-all duration-500 ${
             isOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'
         }`}
       >
@@ -194,14 +194,15 @@ export default function Header() {
       </div>
 
       {/* ▼▼▼ Mobile Menu Button (Floating) ▼▼▼ */}
-      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[70] md:hidden">
+      {/* 修正: z-indexを高く設定 (z-[100]) し、フッターより前面に出るようにする */}
+      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] md:hidden">
         <button 
             onClick={toggleMenu}
             className={`
-                relative z-50 px-6 py-2.5 rounded-full shadow-lg flex items-center gap-2 transition-all duration-300 border border-white/20 backdrop-blur-sm
+                relative z-50 px-6 py-2.5 rounded-full shadow-2xl flex items-center gap-2 transition-all duration-300 border border-white/20 backdrop-blur-sm
                 ${isOpen 
                     ? 'bg-gray-800 text-white hover:bg-gray-700'
-                    : 'bg-gradient-to-r from-[#264653] to-[#2A9D8F] text-white hover:scale-105 animate-pulse-glow'
+                    : 'bg-gradient-to-r from-[#264653] to-[#2A9D8F] text-white hover:scale-105 animate-pulse-glow shadow-melon/30'
                 }
             `}
         >
