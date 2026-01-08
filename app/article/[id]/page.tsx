@@ -5,12 +5,17 @@ import StickyBottomNav from "@/components/StickyBottomNav";
 
 export const revalidate = 0;
 
-// ▼▼▼ 設定エリア ▼▼▼
-const PROBLEM_TAG_OPTIONS = ["在庫が合わない", "IT担当がいない", "アナログ管理をやめたい", "売上が伸び悩んでいる", "人手不足", "コスト削減", "集客できない"];
-const SOLUTION_TAG_OPTIONS = ["在庫管理システム", "ECサイト構築", "Web制作", "AI・自動化", "POSレジ", "補助金活用", "SNS運用"];
-// ▲▲▲ 設定エリア ▲▲▲
+// ▼▼▼ サービス定義 (他ページと共通化) ▼▼▼
+const serviceItems = [
+    { id: "dx", name: "業務設計・DX支援", path: "/service/dx" },
+    { id: "web", name: "Webサイト制作", path: "/service/web" },
+    { id: "ec", name: "ECサイト構築・運用", path: "/service/ec" },
+    { id: "design", name: "デザイン制作", path: "/service/design" },
+];
 
-// --- データ取得 ---
+// ▼▼▼ データ取得関数 ▼▼▼
+
+// 1. 記事詳細を取得
 async function getArticle(id: string) {
   try {
     const data = await client.get({ endpoint: "article", contentId: id, customRequestInit: { cache: "no-store" } });
@@ -18,6 +23,7 @@ async function getArticle(id: string) {
   } catch (error) { return null; }
 }
 
+// 2. 最新記事を取得
 async function getLatestArticles() {
   try {
     const data = await client.get({ endpoint: "article", queries: { limit: 5, orders: "-publishedAt" } });
@@ -25,28 +31,70 @@ async function getLatestArticles() {
   } catch (error) { return []; }
 }
 
-async function getCategoryList() {
+// 3. 全タグ情報を取得 (サービス判定用)
+async function getTags() {
   try {
-    const data = await client.get({ endpoint: "category", queries: { limit: 20 } });
+    const data = await client.get({ endpoint: "tags", queries: { limit: 100 } });
     return data.contents;
-  } catch (error) { return []; }
+  } catch (e) { return []; }
 }
 
+// --- ヘルパー関数 ---
 const formatDate = (dateString: string | undefined | null) => {
   if (!dateString) return null;
   return new Date(dateString).toLocaleDateString("ja-JP", { year: "numeric", month: "2-digit", day: "2-digit" }).replace(/\//g, '.');
 };
 
-const getCategoryName = (cat: any) => {
-    if (!cat) return "お知らせ";
-    if (Array.isArray(cat)) return cat[0] ? (cat[0].name || cat[0]) : "お知らせ";
-    if (typeof cat === 'object') return cat.name || "お知らせ";
-    return cat;
+// タグ名を取り出す関数（オブジェクト/文字列両対応）
+const getTagName = (tag: any) => {
+  if (!tag) return "";
+  if (typeof tag === "string") return tag;
+  return tag.name || tag.tag || tag.label || "";
 };
+
+// ★修正: カテゴリ名決定ロジック (タグからサービスを逆引き)
+const getDisplayCategory = (article: any, allTags: any[]) => {
+    // 1. もしmicroCMSで「カテゴリ」が設定されていればそれを最優先
+    if (article.category) {
+        if (Array.isArray(article.category)) return article.category[0]?.name || "お知らせ";
+        if (typeof article.category === 'object') return article.category.name || "お知らせ";
+    }
+
+    // 2. カテゴリがない場合、記事のタグ(problem_tags / solution_tags)を見てサービスを推定
+    const articleTags = [
+        ...(article.problem_tags || []),
+        ...(article.solution_tags || [])
+    ];
+
+    // 記事についているタグの名前リスト
+    const articleTagNames = articleTags.map(t => getTagName(t));
+
+    // APIから取得した全タグ情報を使って、マッチングするサービスを探す
+    for (const tagName of articleTagNames) {
+        const tagData = allTags.find((t: any) => t.name === tagName);
+        if (tagData && tagData.related_services && tagData.related_services.length > 0) {
+            // タグに関連付けられたサービスID (dx, web, ec...) を取得
+            const serviceId = tagData.related_services[0]; 
+            // サービスIDから日本語名を取得
+            const service = serviceItems.find(s => s.id === serviceId);
+            if (service) return service.name;
+        }
+    }
+
+    // 3. それでも見つからなければデフォルト
+    return "お知らせ";
+};
+
 
 export default async function ArticlePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [article, latestArticles, categoryList] = await Promise.all([getArticle(id), getLatestArticles(), getCategoryList()]);
+  
+  // 記事、最新記事、全タグを並行取得
+  const [article, latestArticles, allTags] = await Promise.all([
+      getArticle(id), 
+      getLatestArticles(), 
+      getTags()
+  ]);
 
   if (!article) notFound();
 
@@ -60,13 +108,21 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
 
   const currentPTags = article.problem_tags || [];
   const currentSTags = article.solution_tags || [];
-  const currentCategoryName = getCategoryName(article.category);
-  const currentCategoryId = typeof article.category === 'object' ? article.category?.id : null;
+  
+  // ★修正: カテゴリ名を自動判定ロジックで取得
+  const currentCategoryName = getDisplayCategory(article, allTags);
+  
+  // サービスIDの逆引き (検索ページへのリンク用)
+  const currentServiceItem = serviceItems.find(s => s.name === currentCategoryName);
+  
+  // 検索ページで使用するタグリスト生成（サイドバー用）
+  const searchProblemTags = allTags.filter((t: any) => t.type?.includes("problem")).map((t: any) => t.name);
+  const searchSolutionTags = allTags.filter((t: any) => t.type?.includes("solution")).map((t: any) => t.name);
 
   return (
     <main className="bg-[#F9FAFB] min-h-screen pt-14 md:pt-16 pb-20">
       
-      {/* パンくず (上部) */}
+      {/* パンくず */}
       <div className="bg-white border-b border-gray-100 relative overflow-hidden">
           <div className="container mx-auto px-4 md:px-6 max-w-6xl py-4 md:py-6 relative z-10">
              <nav className="flex items-center text-[10px] md:text-xs text-gray-400 font-en gap-2">
@@ -87,31 +143,23 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
                 
                 {/* 記事ヘッダー */}
                 <div className="p-6 md:p-8 border-b border-gray-100">
-                    {/* ★修正: flex-col-reverse (SPで逆順=テキスト上) / md:flex-row (PCで正順=画像左) */}
                     <div className="flex flex-col-reverse md:flex-row gap-6 md:gap-8 items-start">
                         
-                        {/* 画像エリア (DOM上は先頭 = SPでは下に表示、PCでは左に表示) */}
                         <div className="w-full md:w-[240px] flex-shrink-0">
                             <div className="relative aspect-square md:aspect-[4/3] rounded-xl overflow-hidden shadow-sm border border-gray-100">
-                                <img 
-                                    src={imageUrl} 
-                                    alt={article.title} 
-                                    className="w-full h-full object-cover"
-                                />
+                                <img src={imageUrl} alt={article.title} className="w-full h-full object-cover" />
                             </div>
                         </div>
 
-                        {/* タイトル・情報エリア (DOM上は後尾 = SPでは上に表示、PCでは右に表示) */}
                         <div className="flex-grow w-full">
-                            {/* カテゴリ & 日付 */}
                             <div className="flex flex-wrap items-center gap-3 mb-4">
-                                {currentCategoryId ? (
-                                    <Link href={`/search?categoryId=${currentCategoryId}&categoryName=${currentCategoryName}`} className="bg-melon-light text-melon-dark text-[10px] font-bold px-2.5 py-1 rounded-full hover:bg-melon hover:text-white transition-colors">
-                                        {currentCategoryName}
-                                    </Link>
-                                ) : (
-                                    <span className="bg-melon-light text-melon-dark text-[10px] font-bold px-2.5 py-1 rounded-full">{currentCategoryName}</span>
-                                )}
+                                {/* ★修正: 自動判定されたカテゴリ名を表示 */}
+                                <Link 
+                                    href={currentServiceItem ? currentServiceItem.path : "/articles"} 
+                                    className="bg-melon-light text-melon-dark text-[10px] font-bold px-2.5 py-1 rounded-full hover:bg-melon hover:text-white transition-colors"
+                                >
+                                    {currentCategoryName}
+                                </Link>
                                 <div className="text-xs text-gray-500 font-en flex items-center gap-1.5">
                                     <i className={`far ${isRenewed ? 'fa-check-circle text-melon-dark' : 'fa-clock'}`}></i>
                                     {displayDate}
@@ -119,21 +167,20 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
                                 </div>
                             </div>
 
-                            {/* タイトル */}
                             <h1 className="text-xl md:text-2xl font-bold text-[#264653] leading-tight mb-4 md:mb-5">
                                 {article.title}
                             </h1>
 
                             {/* タグ一覧 */}
                             <div className="flex flex-wrap gap-2">
-                                {Array.isArray(currentPTags) && currentPTags.map((tag: string, i: number) => (
-                                    <Link key={`p-${i}`} href={`/search?tag=${encodeURIComponent(tag)}`} className="text-[#E76F51] border border-red-100 bg-red-50 text-[10px] font-bold px-2 py-1 rounded-md hover:bg-[#E76F51] hover:text-white transition-colors">
-                                        #{tag}
+                                {Array.isArray(currentPTags) && currentPTags.map((tag: any, i: number) => (
+                                    <Link key={`p-${i}`} href={`/search?tag=${encodeURIComponent(getTagName(tag))}`} className="text-[#E76F51] border border-red-100 bg-red-50 text-[10px] font-bold px-2 py-1 rounded-md hover:bg-[#E76F51] hover:text-white transition-colors">
+                                        #{getTagName(tag)}
                                     </Link>
                                 ))}
-                                {Array.isArray(currentSTags) && currentSTags.map((tag: string, i: number) => (
-                                    <Link key={`s-${i}`} href={`/search?tag=${encodeURIComponent(tag)}`} className="text-[#264653] border border-melon/20 bg-melon-light/30 text-[10px] font-bold px-2 py-1 rounded-md hover:bg-melon-dark hover:text-white transition-colors">
-                                        #{tag}
+                                {Array.isArray(currentSTags) && currentSTags.map((tag: any, i: number) => (
+                                    <Link key={`s-${i}`} href={`/search?tag=${encodeURIComponent(getTagName(tag))}`} className="text-[#264653] border border-melon/20 bg-melon-light/30 text-[10px] font-bold px-2 py-1 rounded-md hover:bg-melon-dark hover:text-white transition-colors">
+                                        #{getTagName(tag)}
                                     </Link>
                                 ))}
                             </div>
@@ -181,35 +228,47 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
                         ))}
                     </div>
                 </div>
-                {/* サービス */}
+                
+                {/* サービス (固定リストを使用) */}
                 <div>
                     <h3 className="font-bold text-[#264653] border-b-2 border-melon/20 pb-2 mb-4 text-sm flex items-center gap-2">サービス</h3>
                     <div className="flex flex-wrap gap-2">
-                        {Array.isArray(categoryList) && categoryList.map((cat: any) => {
-                                const catName = typeof cat === 'object' ? cat.name : cat;
-                                const catId = typeof cat === 'object' ? cat.id : null;
-                                return <Link key={cat.id || catName} href={catId ? `/search?categoryId=${catId}&categoryName=${encodeURIComponent(catName)}` : `/search?tag=${encodeURIComponent(catName)}`} className="bg-white border border-gray-200 text-gray-500 text-[10px] font-bold px-3 py-1.5 rounded-full hover:bg-melon-light hover:text-melon-dark hover:border-melon-light transition-colors shadow-sm">{catName}</Link>;
-                        })}
+                        {serviceItems.map((service, i) => (
+                            <Link key={i} href={service.path} className="bg-white border border-gray-200 text-gray-500 text-[10px] font-bold px-3 py-1.5 rounded-full hover:bg-melon-light hover:text-melon-dark hover:border-melon-light transition-colors shadow-sm">
+                                {service.name}
+                            </Link>
+                        ))}
                     </div>
                 </div>
-                {/* 課題 */}
+
+                {/* 課題から探す (★修正: APIから取得したタグを表示) */}
                 <div>
                     <h3 className="font-bold text-[#264653] border-b-2 border-melon/20 pb-2 mb-4 text-sm flex items-center gap-2">課題から探す</h3>
                     <div className="flex flex-wrap gap-2">
-                        {PROBLEM_TAG_OPTIONS.map((tag, i) => (<Link key={i} href={`/search?tag=${encodeURIComponent(tag)}`} className="bg-white border border-red-100 text-[#E76F51] text-[10px] font-bold px-3 py-1.5 rounded shadow-sm hover:bg-red-50 transition-colors">{tag}</Link>))}
+                        {searchProblemTags.map((tag: any, i: number) => (
+                            <Link key={i} href={`/search?tag=${encodeURIComponent(tag)}`} className="bg-white border border-red-100 text-[#E76F51] text-[10px] font-bold px-3 py-1.5 rounded shadow-sm hover:bg-red-50 transition-colors">
+                                {tag}
+                            </Link>
+                        ))}
                     </div>
                 </div>
-                {/* 解決策 */}
+                
+                {/* 解決策から探す (★修正: APIから取得したタグを表示) */}
                 <div>
                     <h3 className="font-bold text-[#264653] border-b-2 border-melon/20 pb-2 mb-4 text-sm flex items-center gap-2">解決策から探す</h3>
                     <div className="flex flex-wrap gap-2">
-                        {SOLUTION_TAG_OPTIONS.map((tag, i) => (<Link key={i} href={`/search?tag=${encodeURIComponent(tag)}`} className="bg-white border border-melon/20 text-melon-dark text-[10px] font-bold px-3 py-1.5 rounded shadow-sm hover:bg-melon-light transition-colors">{tag}</Link>))}
+                        {searchSolutionTags.map((tag: any, i: number) => (
+                            <Link key={i} href={`/search?tag=${encodeURIComponent(tag)}`} className="bg-white border border-melon/20 text-melon-dark text-[10px] font-bold px-3 py-1.5 rounded shadow-sm hover:bg-melon-light transition-colors">
+                                {tag}
+                            </Link>
+                        ))}
                     </div>
                 </div>
+                
                 {/* バナー */}
                 <div className="bg-gradient-to-br from-[#264653] to-[#2A9D8F] rounded-xl p-6 text-white text-center shadow-lg mt-4">
                     <p className="text-xs font-bold mb-3 opacity-90">お困りごとはありませんか？</p>
-                    <Link href="#" className="block bg-white text-melon-dark text-xs font-bold py-3 rounded-full hover:shadow-md transition-shadow">無料相談はこちら</Link>
+                    <Link href="/contact" className="block bg-white text-melon-dark text-xs font-bold py-3 rounded-full hover:shadow-md transition-shadow">無料相談はこちら</Link>
                 </div>
             </aside>
 

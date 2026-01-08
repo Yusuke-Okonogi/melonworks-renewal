@@ -28,6 +28,19 @@ async function getPickupArticles() {
   return data.contents;
 }
 
+// 3. タグ一覧を取得
+async function getTags() {
+  try {
+    const data = await client.get({ 
+      endpoint: "tags", 
+      queries: { limit: 100 } 
+    });
+    return data.contents;
+  } catch (e) {
+    return [];
+  }
+}
+
 // --- ヘルパー関数 ---
 const getTagName = (tag: any) => {
   if (!tag) return "";
@@ -48,7 +61,20 @@ const formatDate = (dateStr: string) => {
 };
 
 export default async function Home() {
-  const [news, pickups] = await Promise.all([getNews(), getPickupArticles()]);
+  const [news, pickups, allTags] = await Promise.all([getNews(), getPickupArticles(), getTags()]);
+
+  // ▼▼▼ タグの振り分け処理 ▼▼▼
+  const getServiceTags = (serviceKey: string, type: "problem" | "solution") => {
+    return allTags
+      .filter((tag: any) => 
+        tag.type?.includes(type) && tag.related_services?.includes(serviceKey)
+      )
+      .map((tag: any) => tag.name);
+  };
+
+  // 全体の検索用リスト（重複なしの全タグリスト）
+  const searchProblemTags = allTags.filter((t: any) => t.type?.includes("problem")).map((t: any) => t.name);
+  const searchSolutionTags = allTags.filter((t: any) => t.type?.includes("solution")).map((t: any) => t.name);
 
   // HOW WE DO のデータ定義
   const howWeDoItems = [
@@ -69,15 +95,16 @@ export default async function Home() {
     }
   ];
 
-  // サービスデータ
+  // サービスデータ (★修正: 各タグを最大3つまでに制限)
   const serviceItems = [
     { 
         id: "01",
         icon: "shapes", 
         title: "業務設計・DX支援", 
         desc: "業務の流れや情報の分断を整理し、\n現場に無理のない仕組みを設計します。\nツール選定から運用定着まで、一緒に支援します。",
-        pTags: ["アナログ管理をやめたい", "人手不足"],
-        sTags: ["AI・自動化", "補助金活用"],
+        // .slice(0, 3) を追加
+        pTags: getServiceTags("dx", "problem").slice(0, 3), 
+        sTags: getServiceTags("dx", "solution").slice(0, 3),
         href: "/service/dx" 
     },
     { 
@@ -85,8 +112,8 @@ export default async function Home() {
         icon: "laptop-code", 
         title: "Webサイト制作", 
         desc: "コーポレートサイトやLPを、\n更新・運用しやすい形で設計・制作。\n使われ続けるWebを前提に考えます。",
-        pTags: ["集客できない", "売上が伸び悩んでいる"],
-        sTags: ["Web制作", "SNS運用"],
+        pTags: getServiceTags("web", "problem").slice(0, 3),
+        sTags: getServiceTags("web", "solution").slice(0, 3),
         href: "/service/web" 
     },
     { 
@@ -94,8 +121,8 @@ export default async function Home() {
         icon: "store", 
         title: "ECサイト構築・運用", 
         desc: "ECサイトの構築から、\n在庫や業務との連動、日々の運用まで。\n現場とつながる「売る仕組み」をつくります。",
-        pTags: ["在庫が合わない", "売上が伸び悩んでいる"],
-        sTags: ["ECサイト構築", "在庫管理システム"],
+        pTags: getServiceTags("ec", "problem").slice(0, 3),
+        sTags: getServiceTags("ec", "solution").slice(0, 3),
         href: "/service/ec" 
     },
     { 
@@ -103,8 +130,8 @@ export default async function Home() {
         icon: "palette", 
         title: "デザイン制作", 
         desc: "紙・Webを問わず、\n運用や更新を前提にしたデザインを制作。\n現場で使われることを大切にしています。",
-        pTags: ["集客できない"],
-        sTags: ["SNS運用"],
+        pTags: getServiceTags("design", "problem").slice(0, 3),
+        sTags: getServiceTags("design", "solution").slice(0, 3),
         href: "/service/design" 
     }
   ];
@@ -115,7 +142,7 @@ export default async function Home() {
       {/* FV Section */}
       <section className="bg-[#FAFAFA] relative lg:min-h-[calc(100vh-64px)] min-h-[600px] flex flex-col justify-center py-10 lg:py-20">
           <div className="absolute inset-0 z-0 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(38, 70, 83, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(38, 70, 83, 0.05) 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
-          <div className="absolute right-[-40%] lg:right-[-10%] top-10 lg:top-[10%] w-[90%] lg:w-[50%] h-[50%] lg:h-[80%] z-0 pointer-events-none">
+          <div className="absolute right-[-60%] md:right-[-40%] lg:right-[-10%] top-10 lg:top-[10%] w-[90%] lg:w-[50%] h-[50%] lg:h-[80%] z-0 pointer-events-none">
               <img src="/fv-illustration.png" alt="DX Illustration" className="w-full h-full object-contain object-right-top opacity-80 lg:opacity-80" />
           </div>
           <div className="absolute right-0 bottom-0 w-[600px] h-[600px] bg-melon-light/30 rounded-full blur-[120px] pointer-events-none translate-x-1/3 translate-y-1/3 z-0"></div>
@@ -124,26 +151,20 @@ export default async function Home() {
               <div className="w-full lg:w-6/12 text-left mb-8 lg:mb-12 relative z-20 pt-4 lg:pt-0">
                   <div className="flex items-center gap-3 mb-4 lg:mb-6">
                       <span className="w-8 lg:w-12 h-[2px] bg-melon-dark"></span>
-                      {/* 修正: text-xs -> text-sm */}
                       <p className="text-melon-dark font-bold tracking-widest font-en text-sm uppercase">DX & Creative Partner</p>
                   </div>
                   <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold font-en leading-tight mb-4 lg:mb-6 text-[#264653] tracking-tight">Less is more</h1>
-                  {/* 修正: text-s(タイポ) -> text-sm */}
                   <p className="text-gray-600 text-sm md:text-base leading-relaxed mb-6 font-medium max-w-lg">ありふれた情報・モノの中でシンプルに考え、<br />シンプルに行動。そして豊かに。</p>
                     <div className="flex flex-wrap gap-2 mb-8">
-                      {/* タグ: 12px (text-[12px] または text-xs) */}
                       <Link href="/service/dx" className="bg-white border border-gray-200 text-gray-500 text-xs font-bold px-3 py-2 rounded-full shadow-sm flex items-center gap-1 hover:border-melon-dark hover:text-melon-dark transition-colors">
                           <i className="fas fa-shapes text-melon-dark/50"></i> 業務設計・DX支援
                       </Link>
-
                       <Link href="/service/web" className="bg-white border border-gray-200 text-gray-500 text-xs font-bold px-3 py-2 rounded-full shadow-sm flex items-center gap-1 hover:border-melon-dark hover:text-melon-dark transition-colors">
                           <i className="fas fa-laptop-code text-melon-dark/50"></i> Web制作
                       </Link>
-
                       <Link href="/service/ec" className="bg-white border border-gray-200 text-gray-500 text-xs font-bold px-3 py-2 rounded-full shadow-sm flex items-center gap-1 hover:border-melon-dark hover:text-melon-dark transition-colors">
                           <i className="fas fa-store text-melon-dark/50"></i> EC構築
                       </Link>
-                      
                       <Link href="/service/design" className="bg-white border border-gray-200 text-gray-500 text-xs font-bold px-3 py-2 rounded-full shadow-sm flex items-center gap-1 hover:border-melon-dark hover:text-melon-dark transition-colors">
                           <i className="fas fa-palette text-melon-dark/50"></i> デザイン制作
                       </Link>
@@ -169,18 +190,15 @@ export default async function Home() {
                                       <div className="absolute inset-0 bg-gradient-to-t from-[#264653] via-[#264653]/40 to-transparent"></div>
                                   </div>
                                   <div className="absolute top-4 left-4 z-20 pointer-events-none">
-                                      {/* 修正: text-[10px] -> text-xs (12px) */}
                                       <span className="bg-white text-[#264653] text-xs font-bold px-3 py-1 rounded-full shadow-sm">
                                         {categoryName}
                                       </span>
                                   </div>
                                   <div className="absolute bottom-0 p-5 z-10 w-full pointer-events-none">
-                                      {/* 修正: 日付は12px (text-xs) で維持 */}
                                       <time className="text-white text-xs font-en block mb-2 font-medium opacity-90 drop-shadow-sm">{formatDate(article.publishedAt || article.createdAt)}</time>
                                       <h3 className="font-bold text-lg md:text-xl leading-snug mb-3 text-white drop-shadow-md line-clamp-2">{article.title}</h3>
                                       <div className="flex flex-wrap gap-2">
                                         {[...pTags, ...sTags].slice(0, 3).map((tag: any, i: number) => (
-                                            /* 修正: text-[10px] -> text-xs (12px) */
                                             <span key={i} className={`bg-white text-xs font-bold px-2.5 py-1 rounded shadow-sm relative z-20 ${pTags.includes(tag) ? 'text-[#E76F51]' : 'text-melon-dark'}`}>
                                                 {getTagName(tag)}
                                             </span>
@@ -202,7 +220,6 @@ export default async function Home() {
            <div className="container mx-auto px-4 md:px-6 max-w-6xl relative z-10">
               <div className="flex flex-col lg:flex-row gap-10 lg:gap-20 items-center">
                   <div className="lg:w-5/12">
-                      {/* 修正: text-xs -> text-sm */}
                       <span className="text-melon-light font-bold tracking-widest font-en text-sm uppercase mb-4 block">HOW WE DO</span>
                       <h2 className="text-2xl md:text-3xl font-bold leading-tight mb-6">一緒につくって、一緒に回す。<br />現場が止まらないDXを。</h2>
                       <p className="text-gray-300 text-sm md:text-base leading-relaxed mb-6">つくる人、つかう人、対話を重ねて良いものを。<br />システムに使われるのではなく、人が使いこなせる「あたたかみのある」DXを実現します。</p>
@@ -219,7 +236,6 @@ export default async function Home() {
                                               <i className={`fas fa-${item.icon} text-xl text-melon-light`}></i>
                                               <h3 className="font-bold text-xl">{item.title}</h3>
                                           </div>
-                                          {/* 修正: text-xs/text-smが混在していたらtext-smへ */}
                                           <p className="text-gray-400 text-sm leading-relaxed group-hover:text-gray-200 transition-colors">
                                               {item.text}
                                           </p>
@@ -240,10 +256,8 @@ export default async function Home() {
 
           <div className="container mx-auto px-4 md:px-6 max-w-6xl relative z-10">
               <div className="text-center mb-16">
-                  {/* 修正: text-xs -> text-sm */}
                   <span className="text-melon-dark font-bold tracking-widest font-en text-sm uppercase mb-3 block">SERVICE</span>
-                  <h2 className="text-2xl md:text-3xl font-bold text-[#264653]">提供サービス</h2>
-                  {/* 修正: text-sm維持 (14px) */}
+                  <h2 className="text-2xl md:text-3xl font-bold text-[#264653]">サービス</h2>
                   <p className="text-gray-500 mt-4 text-sm max-w-2xl mx-auto">
                       「つくる」だけでなく「動かす」まで。<br className="hidden md:inline" />
                       現場目線で、ビジネスを加速させる4つのアプローチ。
@@ -275,7 +289,6 @@ export default async function Home() {
                           
                           {/* 本文 */}
                           <div className="mb-4 relative z-10">
-                              {/* 修正: text-xs -> text-sm */}
                               <p className="text-sm text-gray-500 font-medium leading-relaxed whitespace-pre-wrap">
                                   {s.desc}
                               </p>
@@ -283,17 +296,15 @@ export default async function Home() {
                           
                           {/* 関連タグ */}
                           <div className="pt-3 border-t border-gray-50 w-full relative z-10">
-                                {/* 修正: text-[9px] -> text-xs (12px) */}
                                 <p className="text-xs text-gray-400 font-bold mb-2">関連タグ</p>
                                 <div className="flex flex-wrap gap-1.5">
-                                    {s.pTags.map((tag, idx) => (
-                                        /* 修正: text-[9px] -> text-xs (12px) */
+                                    {/* 自動取得したタグを表示 */}
+                                    {s.pTags.map((tag: any, idx: number) => (
                                         <span key={`p-${idx}`} className="text-[#E76F51] border border-red-50 bg-red-50/50 text-xs font-bold px-2 py-1 rounded backdrop-blur-sm">
                                             {tag}
                                         </span>
                                     ))}
-                                    {s.sTags.map((tag, idx) => (
-                                        /* 修正: text-[9px] -> text-xs (12px) */
+                                    {s.sTags.map((tag: any, idx: number) => (
                                         <span key={`s-${idx}`} className="text-melon-dark border border-melon/10 bg-melon-light/20 text-xs font-bold px-2 py-1 rounded backdrop-blur-sm">
                                             {tag}
                                         </span>
@@ -309,17 +320,17 @@ export default async function Home() {
           </div>
       </section>
 
-      {/* SEARCH (変更なし) */}
+      {/* SEARCH */}
       <section className="bg-white py-24 border-y border-gray-100 relative overflow-hidden">
           <div className="absolute left-0 top-0 w-[25%] z-0 pointer-events-none opacity-20 hidden lg:block"><img src="/light.png" alt="Solution Idea" className="w-full h-auto object-contain" /></div>
           <div className="container mx-auto px-4 md:px-6 max-w-6xl relative z-10">
               <div className="text-center mb-10">
-                   {/* 修正: text-xs -> text-sm */}
                    <span className="text-melon-dark font-bold tracking-widest font-en text-sm uppercase mb-2 block">FIND YOUR SOLUTION</span>
                   <h2 className="text-2xl md:text-3xl font-bold text-[#264653]">記事検索</h2>
-                  {/* 修正: text-sm維持 */}
                   <p className="text-gray-500 mt-3 text-sm">あなたの現在の状況に合わせて、最適な解決策を探せます。</p>
               </div>
+              
+              {/* 課題から探す */}
               <div className="bg-[#FAFAFA]/95 backdrop-blur-sm rounded-xl p-6 mb-6 border border-gray-100 hover:shadow-md transition-shadow relative">
                   <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
                       <div className="w-full md:w-48 flex-shrink-0 flex items-center justify-between md:justify-start gap-3">
@@ -329,13 +340,14 @@ export default async function Home() {
                           </div>
                       </div>
                       <div className="flex-grow flex flex-wrap gap-2">
-                          {["在庫が合わない", "IT担当がいない", "アナログ管理をやめたい", "売上が伸び悩んでいる", "人手不足", "コスト削減"].map((t, i) => (
-                              /* 修正: text-xs (12px) 維持 */
+                          {searchProblemTags.map((t: any, i: number) => (
                               <Link key={i} href={`/search?tag=${encodeURIComponent(t)}`} className="tag-hover px-3 py-2 bg-white border border-red-100 text-accent-redText rounded-full text-xs font-bold flex items-center gap-1.5 shadow-sm">{t}</Link>
                           ))}
                       </div>
                   </div>
               </div>
+
+              {/* 解決策から探す */}
               <div className="bg-melon-light/95 backdrop-blur-sm rounded-xl p-6 border border-melon/20 hover:shadow-md transition-shadow relative">
                   <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
                       <div className="w-full md:w-48 flex-shrink-0 flex items-center justify-between md:justify-start gap-3">
@@ -345,8 +357,7 @@ export default async function Home() {
                           </div>
                       </div>
                       <div className="flex-grow flex flex-wrap gap-2">
-                          {["在庫管理システム", "ECサイト構築", "Web制作", "AI・自動化", "POSレジ", "補助金活用"].map((t, i) => (
-                              /* 修正: text-xs (12px) 維持 */
+                          {searchSolutionTags.map((t: any, i: number) => (
                               <Link key={i} href={`/search?tag=${encodeURIComponent(t)}`} className="tag-hover px-3 py-2 bg-white border border-melon/20 text-melon-dark rounded-full text-xs font-bold flex items-center gap-1.5 shadow-sm">{t}</Link>
                           ))}
                       </div>
@@ -380,7 +391,6 @@ export default async function Home() {
                                   </div>
                                   <div className="absolute top-4 left-4 z-20 pointer-events-none">
                                       {categoryId ? (
-                                        /* 修正: text-[10px] -> text-xs (12px) */
                                         <Link href={`/search?categoryId=${categoryId}&categoryName=${categoryName}`} className="bg-white text-[#264653] text-xs font-bold px-3 py-1 rounded-full shadow-sm hover:bg-melon-light transition-colors relative z-20 pointer-events-auto">{categoryName}</Link>
                                       ) : (
                                         <span className="bg-white text-[#264653] text-xs font-bold px-3 py-1 rounded-full shadow-sm">{categoryName}</span>
@@ -391,13 +401,11 @@ export default async function Home() {
                                       <h3 className="font-bold text-lg leading-snug mb-3 text-white drop-shadow-md line-clamp-2">{article.title}</h3>
                                       <div className="flex flex-wrap gap-2 pointer-events-auto">
                                           {pTags.map((tag: any, i: number) => (
-                                              /* 修正: text-[9px] -> text-xs (12px) */
                                               <Link key={`p-${i}`} href={`/search?tag=${encodeURIComponent(getTagName(tag))}`} className="bg-white text-[#E76F51] text-xs font-bold px-2.5 py-1 rounded shadow-sm border border-red-100 hover:shadow-md transition-all relative z-20">
                                                   {getTagName(tag)}
                                               </Link>
                                           ))}
                                           {sTags.map((tag: any, i: number) => (
-                                              /* 修正: text-[9px] -> text-xs (12px) */
                                               <Link key={`s-${i}`} href={`/search?tag=${encodeURIComponent(getTagName(tag))}`} className="bg-white text-melon-dark text-xs font-bold px-2.5 py-1 rounded shadow-sm border border-melon/20 hover:shadow-md transition-all relative z-20">
                                                   {getTagName(tag)}
                                               </Link>
@@ -416,7 +424,6 @@ export default async function Home() {
                            {[1,2,3].map(n => (
                                <Link key={n} href="#" className="group flex gap-4 items-start">
                                    <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center bg-[#264653] text-white font-en font-bold text-sm rounded-lg shadow-md group-hover:bg-melon-dark transition-colors">{n}</div>
-                                   {/* 修正: text-[10px] -> text-xs (12px) */}
                                    <div><h4 className="text-sm font-bold leading-relaxed text-gray-800 group-hover:text-melon-dark transition-colors">ダミー記事タイトル：ECサイトのリニューアル時期について{n}</h4><span className="text-xs text-gray-400 font-en mt-1 block"><i className="far fa-eye mr-1"></i> {1234-n*100} views</span></div>
                                </Link>
                            ))}

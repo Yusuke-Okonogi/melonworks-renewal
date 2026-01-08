@@ -6,21 +6,23 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Webサイト制作",
-  description: "「更新しやすさ」と「成果」を両立するWebサイト制作。デザインの美しさだけでなく、運用の手間を最小限に抑え、ビジネスの成長を後押しするサイトを構築します。",
+  description: "コーポレートサイトやLPを、更新・運用しやすい形で設計・制作。使われ続けるWebを前提に考えます。",
   openGraph: {
     title: "Webサイト制作 | Melon Works",
-    description: "「更新しやすさ」と「成果」を両立するWebサイト制作。デザインの美しさだけでなく、運用の手間を最小限に抑え、ビジネスの成長を後押しするサイトを構築します。",
+    description: "コーポレートサイトやLPを、更新・運用しやすい形で設計・制作。使われ続けるWebを前提に考えます。",
   },
 };
 
-// --- データ取得: Web制作関連の記事を取得 ---
+// --- データ取得関数 ---
+
+// 1. Web関連の記事を取得
 async function getWebArticles() {
   try {
     const data = await client.get({
       endpoint: "article",
       queries: {
-        // タグに「Web制作」「デザイン」「集客」「SEO」などを含む記事を取得
-        filters: "solution_tags[contains]Web制作[or]solution_tags[contains]ECサイト構築[or]solution_tags[contains]SNS運用[or]problem_tags[contains]集客",
+        // Web制作、コーディング、CMSなどに関連する記事を取得
+        filters: "solution_tags[contains]Web制作[or]solution_tags[contains]コーディング[or]solution_tags[contains]CMS[or]problem_tags[contains]集客できない",
         limit: 3, 
         orders: "-publishedAt",
       },
@@ -30,6 +32,19 @@ async function getWebArticles() {
   } catch (error) {
     return [];
   }
+}
+
+// 2. 全タグ情報を取得 (★追加)
+async function getTags() {
+    try {
+        const data = await client.get({ 
+            endpoint: "tags", 
+            queries: { limit: 100 } 
+        });
+        return data.contents;
+    } catch (e) {
+        return [];
+    }
 }
 
 // --- ヘルパー関数 ---
@@ -53,17 +68,21 @@ const formatDate = (dateStr: string) => {
 };
 
 export default async function WebServicePage() {
-  const webArticles = await getWebArticles();
+  // 記事とタグを並行取得 (★修正)
+  const [webArticles, allTags] = await Promise.all([
+      getWebArticles(),
+      getTags()
+  ]);
 
-  // Web制作に関連するタグ定義
-  const relatedProblemTags = [
-      "集客できない", "売上が伸び悩んでいる", "デザインが古い", 
-      "スマホ対応していない", "更新が面倒・できない", "採用応募が来ない"
-  ];
-  const relatedSolutionTags = [
-      "Webサイト制作", "SEO対策", "UI/UXデザイン", 
-      "CMS導入(WordPress等)", "レスポンシブ対応", "採用サイト制作"
-  ];
+  // ★タグの自動抽出ロジック
+  // related_services に "web" が含まれるタグのみを抽出
+  const relatedProblemTags = allTags
+      .filter((t: any) => t.type?.includes("problem") && t.related_services?.includes("web"))
+      .map((t: any) => t.name);
+
+  const relatedSolutionTags = allTags
+      .filter((t: any) => t.type?.includes("solution") && t.related_services?.includes("web"))
+      .map((t: any) => t.name);
 
   return (
     <main className="bg-white min-h-screen pt-14 md:pt-16 pb-20 font-sans">
@@ -71,10 +90,10 @@ export default async function WebServicePage() {
     {/* ★共通ヘッダーを使用 */}
       <PageHeader 
         titleEn="BUSINESS DESIGN & DX"
-        titleJp="WEBサイト制作"
+        titleJp="Webサイト制作"
         breadcrumbs={[
             { name: "SERVICE", path: "/service" },
-            { name: "WEBサイト制作" }
+            { name: "Webサイト制作" }
         ]}
       />
 
@@ -86,20 +105,19 @@ export default async function WebServicePage() {
           <div className="container mx-auto px-4 md:px-6 max-w-6xl relative z-10">
               <div className="flex flex-col md:flex-row items-center gap-12 md:gap-20">
                   <div className="w-full md:w-1/2">
-                      <span className="text-melon-dark font-bold tracking-widest font-en text-xs uppercase mb-4 block">WEB CREATIVE</span>
+                      <span className="text-melon-dark font-bold tracking-widest font-en text-xs uppercase mb-4 block">WEB PRODUCTION</span>
                       <h1 className="text-3xl md:text-5xl font-bold text-[#264653] leading-tight mb-6">
-                          ただ作るだけじゃない。<br />
+                          更新しやすく、<br />
                           <span className="relative inline-block">
-                            成果を生み出し、
+                            成果が出る
                             <span className="absolute bottom-1 left-0 w-full h-3 bg-melon-light/40 -z-10"></span>
                           </span>
-                          <br />
-                          運用しやすいWebを。
+                          Webサイトを。
                       </h1>
                       <p className="text-gray-600 text-sm md:text-base leading-relaxed mb-8 font-medium">
-                          コーポレートサイト、採用サイト、LPなど。<br />
-                          デザインの美しさはもちろん、「更新のしやすさ」や「SEO（検索対策）」<br />
-                          まで考慮した、ビジネスの成長につながるWebサイトを構築します。
+                          コーポレートサイトやLPを、更新・運用しやすい形で設計・制作。<br />
+                          ただ作るだけでなく、公開後の更新頻度や運用体制まで見据え、<br />
+                          「使われ続けるWeb」を前提に考えます。
                       </p>
                   </div>
                   <div className="w-full md:w-1/2 relative">
@@ -116,21 +134,20 @@ export default async function WebServicePage() {
           <div className="container mx-auto px-4 md:px-6 max-w-6xl relative z-10">
               <div className="max-w-3xl mx-auto text-center">
                   <h2 className="text-2xl md:text-3xl font-bold text-[#264653] mb-8 leading-snug">
-                      Webサイトは<br className="md:hidden"/>「作って終わり」ではありません。<br />
-                      公開してからがスタートです。
+                      「作ったはいいけど、<br className="md:hidden"/>更新されずに放置されている」<br />
+                      そんなサイトになっていませんか？
                   </h2>
                   <p className="text-gray-500 leading-loose text-sm md:text-base">
-                      「おしゃれなサイトを作ったけれど、誰も見てくれない」<br />
-                      「ちょっとした修正も制作会社に頼まないといけない」<br /><br />
-                      そんなお悩みをよく耳にします。<br />
-                      私たちは、公開後の運用フローまで見据え、お客様自身で簡単に更新できる仕組み（CMS）や、<br />
-                      <strong>ユーザーが迷わず目的を達成できる設計（UI/UX）</strong>を大切にしています。
+                      Webサイトは企業の「顔」ですが、情報が古いままだと信頼を損ないます。<br />
+                      しかし、更新作業が複雑だと、どうしても後回しになりがちです。<br /><br />
+                      私たちは、専門知識がなくても簡単に更新できるCMS（管理画面）の導入や、<br />
+                      <strong>「運用負荷を最小限にする設計」</strong>をご提案します。
                   </p>
               </div>
           </div>
       </section>
 
-      {/* ISSUES & SOLUTIONS */}
+      {/* ISSUES & SOLUTIONS (★修正: 自動取得タグを表示) */}
       <section className="py-24 bg-white relative overflow-hidden border-y border-gray-50">
            <div className="absolute left-0 top-0 w-[500px] h-[500px] bg-gray-50 rounded-full blur-3xl pointer-events-none -translate-x-1/2 -translate-y-1/2"></div>
            <div className="absolute right-0 bottom-0 w-[500px] h-[500px] bg-melon-light/10 rounded-full blur-3xl pointer-events-none translate-x-1/2 translate-y-1/2"></div>
@@ -139,7 +156,7 @@ export default async function WebServicePage() {
                <div className="text-center mb-12">
                    <span className="text-melon-dark font-bold tracking-widest font-en text-xs uppercase mb-3 block">ISSUES & SOLUTIONS</span>
                    <h2 className="text-2xl md:text-3xl font-bold text-[#264653] mb-4">課題と解決策</h2>
-                   <p className="text-gray-500 text-sm">Webサイトに関するこんなお悩み、解決します。</p>
+                   <p className="text-gray-500 text-sm">Web活用に関するあらゆる課題に対応可能です。</p>
                </div>
 
                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
@@ -152,7 +169,8 @@ export default async function WebServicePage() {
                            <h3 className="font-bold text-lg text-[#264653]">抱えている課題</h3>
                        </div>
                        <div className="flex flex-wrap gap-2 relative z-10">
-                           {relatedProblemTags.map((tag, i) => (
+                           {/* ★修正: tag: string を追加 */}
+                           {relatedProblemTags.map((tag: string, i: number) => (
                                <Link key={i} href={`/search?tag=${encodeURIComponent(tag)}`} className="bg-white hover:bg-red-50 border border-red-100 text-[#E76F51] text-xs font-bold px-3 py-2 rounded-full transition-colors flex items-center gap-2 shadow-sm">
                                    {tag}
                                    <i className="fas fa-chevron-right text-[10px] opacity-50"></i>
@@ -170,7 +188,8 @@ export default async function WebServicePage() {
                            <h3 className="font-bold text-lg text-[#264653]">提供する解決策</h3>
                        </div>
                        <div className="flex flex-wrap gap-2 relative z-10">
-                           {relatedSolutionTags.map((tag, i) => (
+                           {/* ★修正: tag: string を追加 */}
+                           {relatedSolutionTags.map((tag: string, i: number) => (
                                <Link key={i} href={`/search?tag=${encodeURIComponent(tag)}`} className="bg-white hover:bg-melon-light/40 border border-melon/20 text-melon-dark text-xs font-bold px-3 py-2 rounded-full transition-colors flex items-center gap-2 shadow-sm">
                                    {tag}
                                    <i className="fas fa-chevron-right text-[10px] opacity-50"></i>
@@ -264,10 +283,10 @@ export default async function WebServicePage() {
                    <div className="absolute left-1/2 top-0 bottom-0 w-px bg-gray-200 -translate-x-1/2 hidden md:block"></div>
                    <div className="space-y-12">
                        {[
-                           { step: "01", title: "ヒアリング・要件定義", text: "サイトの目的、ターゲット、競合、必要な機能などを整理し、サイトマップを作成します。", time: "1〜2週間" },
-                           { step: "02", title: "構成・デザイン", text: "ワイヤーフレーム（設計図）で骨組みを固めてから、具体的なデザインカンプを作成します。", time: "2〜4週間" },
-                           { step: "03", title: "構築（コーディング）", text: "デザインを元にWebブラウザで見られるようにプログラミングします。CMSの実装も行います。", time: "3〜6週間" },
-                           { step: "04", title: "公開・運用レクチャー", text: "サーバーへアップロードして公開。記事の更新方法などのレクチャーも実施します。", time: "1週間〜" }
+                           { step: "01", title: "ヒアリング・要件定義", text: "サイトの目的、ターゲット、必要な機能やページ構成を整理します。", time: "1〜2週間" },
+                           { step: "02", title: "構成案・デザイン", text: "ワイヤーフレーム（設計図）で構成を固めた後、デザイン制作に進みます。", time: "2週間〜" },
+                           { step: "03", title: "構築（コーディング）", text: "デザインをもとにWebページとして構築し、CMS（更新システム）の実装も行います。", time: "3週間〜" },
+                           { step: "04", title: "公開・運用サポート", text: "テスト検証後に公開します。公開後の更新作業や保守管理も承ります。", time: "継続支援" }
                        ].map((flow, i) => (
                            <div key={i} className="flex flex-col md:flex-row items-center gap-6 md:gap-0 relative">
                                <div className="w-full md:w-1/2 md:pr-12 md:text-right order-2 md:order-1">
@@ -289,13 +308,13 @@ export default async function WebServicePage() {
       <section className="bg-gradient-to-br from-[#264653] to-[#2A9D8F] text-white py-24 relative overflow-hidden">
            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white/10 to-transparent pointer-events-none"></div>
           <div className="container mx-auto px-4 md:px-6 max-w-4xl text-center relative z-10">
-              <h2 className="text-2xl md:text-4xl font-bold mb-6">Webサイトでビジネスを加速させませんか？</h2>
+              <h2 className="text-2xl md:text-4xl font-bold mb-6">「使い続けられる」Webサイトをつくりませんか？</h2>
               <p className="text-white/80 mb-10 text-base md:text-lg leading-relaxed">
-                  新規制作はもちろん、リニューアルや部分的な改修も承っております。<br />
-                  「今のサイトの課題を知りたい」といった診断依頼もお気軽にどうぞ。
+                  新規制作からリニューアル、部分的な改修まで。<br />
+                  御社の運用体制に合わせた最適なプランをご提案します。
               </p>
               <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6">
-                  <Link href="#" className="bg-white text-melon-dark font-bold py-4 px-10 rounded-full hover:bg-melon-dark hover:text-white hover:shadow-lg transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2 group">
+                  <Link href="/contact" className="bg-white text-melon-dark font-bold py-4 px-10 rounded-full hover:bg-melon-dark hover:text-white hover:shadow-lg transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2 group">
                       <i className="far fa-envelope group-hover:rotate-12 transition-transform"></i> 無料相談・お問い合わせ
                   </Link>
               </div>

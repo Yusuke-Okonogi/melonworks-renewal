@@ -12,13 +12,15 @@ export const metadata: Metadata = {
     description: "Webと紙（名刺・パンフレット等）のデザインを統一し、ブランドの価値を高めます。ロゴ制作からトータルブランディングまで、想いが伝わる「愛嬌のある」デザインを。",
   },
 };
-// --- データ取得: デザイン関連の記事を取得 ---
+
+// --- データ取得関数 ---
+
+// 1. デザイン関連の記事を取得
 async function getDesignArticles() {
   try {
     const data = await client.get({
       endpoint: "article",
       queries: {
-        // デザイン、ブランディング、紙媒体などに関連する記事を取得
         filters: "solution_tags[contains]デザイン[or]solution_tags[contains]ブランディング[or]solution_tags[contains]ロゴ制作[or]problem_tags[contains]デザインが古い",
         limit: 3, 
         orders: "-publishedAt",
@@ -29,6 +31,19 @@ async function getDesignArticles() {
   } catch (error) {
     return [];
   }
+}
+
+// 2. 全タグ情報を取得
+async function getTags() {
+    try {
+        const data = await client.get({ 
+            endpoint: "tags", 
+            queries: { limit: 100 } 
+        });
+        return data.contents;
+    } catch (e) {
+        return [];
+    }
 }
 
 // --- ヘルパー関数 ---
@@ -52,22 +67,24 @@ const formatDate = (dateStr: string) => {
 };
 
 export default async function DesignServicePage() {
-  const designArticles = await getDesignArticles();
+  // 記事とタグを並行取得
+  const [designArticles, allTags] = await Promise.all([
+      getDesignArticles(),
+      getTags()
+  ]);
 
-  // デザイン制作に関連するタグ定義
-  const relatedProblemTags = [
-      "デザインが古い", "Webと紙でイメージが違う", "集客できない", 
-      "営業資料が分かりにくい", "ブランドが浸透しない", "何から頼めばいいか分からない"
-  ];
-  const relatedSolutionTags = [
-      "フライヤー・チラシ", "パンフレット・冊子", "ロゴ・ブランディング", 
-      "名刺・ショップカード", "営業資料デザイン", "ノベルティ制作"
-  ];
+  // タグの自動抽出ロジック
+  const relatedProblemTags = allTags
+      .filter((t: any) => t.type?.includes("problem") && t.related_services?.includes("design"))
+      .map((t: any) => t.name);
+
+  const relatedSolutionTags = allTags
+      .filter((t: any) => t.type?.includes("solution") && t.related_services?.includes("design"))
+      .map((t: any) => t.name);
 
   return (
     <main className="bg-white min-h-screen pt-14 md:pt-16 pb-20 font-sans">
       
-    {/* ★共通ヘッダーを使用 */}
       <PageHeader 
         titleEn="BUSINESS DESIGN & DX"
         titleJp="デザイン制作"
@@ -150,7 +167,8 @@ export default async function DesignServicePage() {
                            <h3 className="font-bold text-lg text-[#264653]">抱えている課題</h3>
                        </div>
                        <div className="flex flex-wrap gap-2 relative z-10">
-                           {relatedProblemTags.map((tag, i) => (
+                           {/* ★修正: tag: string を追加 */}
+                           {relatedProblemTags.map((tag: string, i: number) => (
                                <Link key={i} href={`/search?tag=${encodeURIComponent(tag)}`} className="bg-white hover:bg-red-50 border border-red-100 text-[#E76F51] text-xs font-bold px-3 py-2 rounded-full transition-colors flex items-center gap-2 shadow-sm">
                                    {tag}
                                    <i className="fas fa-chevron-right text-[10px] opacity-50"></i>
@@ -168,7 +186,8 @@ export default async function DesignServicePage() {
                            <h3 className="font-bold text-lg text-[#264653]">提供する解決策</h3>
                        </div>
                        <div className="flex flex-wrap gap-2 relative z-10">
-                           {relatedSolutionTags.map((tag, i) => (
+                           {/* ★修正: tag: string を追加 */}
+                           {relatedSolutionTags.map((tag: string, i: number) => (
                                <Link key={i} href={`/search?tag=${encodeURIComponent(tag)}`} className="bg-white hover:bg-melon-light/40 border border-melon/20 text-melon-dark text-xs font-bold px-3 py-2 rounded-full transition-colors flex items-center gap-2 shadow-sm">
                                    {tag}
                                    <i className="fas fa-chevron-right text-[10px] opacity-50"></i>
@@ -180,7 +199,7 @@ export default async function DesignServicePage() {
            </div>
       </section>
 
-      {/* CASE STUDY */}
+      {/* CASE STUDY (以下変更なし) */}
       <section className="py-24 bg-[#FAFAFA] relative">
           <div className="container mx-auto px-4 md:px-6 max-w-6xl relative z-10">
                <div className="text-center mb-16">
@@ -251,7 +270,7 @@ export default async function DesignServicePage() {
           </div>
       </section>
 
-      {/* Flow */}
+      {/* Flow (変更なし) */}
       <section className="py-24 bg-white relative">
           <div className="container mx-auto px-4 md:px-6 max-w-4xl relative z-10">
                <div className="text-center mb-16">
@@ -283,7 +302,7 @@ export default async function DesignServicePage() {
           </div>
       </section>
 
-      {/* CTA */}
+      {/* CTA (変更なし) */}
       <section className="bg-gradient-to-br from-[#264653] to-[#2A9D8F] text-white py-24 relative overflow-hidden">
            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white/10 to-transparent pointer-events-none"></div>
           <div className="container mx-auto px-4 md:px-6 max-w-4xl text-center relative z-10">
@@ -293,7 +312,7 @@ export default async function DesignServicePage() {
                   「何を作ればいいか分からない」という段階からでもお気軽にご相談ください。
               </p>
               <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6">
-                  <Link href="#" className="bg-white text-melon-dark font-bold py-4 px-10 rounded-full hover:bg-melon-dark hover:text-white hover:shadow-lg transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2 group">
+                  <Link href="/contact" className="bg-white text-melon-dark font-bold py-4 px-10 rounded-full hover:bg-melon-dark hover:text-white hover:shadow-lg transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2 group">
                       <i className="far fa-envelope group-hover:rotate-12 transition-transform"></i> 無料相談・お問い合わせ
                   </Link>
               </div>

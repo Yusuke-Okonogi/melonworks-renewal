@@ -1,45 +1,81 @@
+import { client } from "@/libs/client"; // ★追加
 import Link from "next/link";
 import StickyBottomNav from "@/components/StickyBottomNav";
 import PageHeader from "@/components/PageHeader";
+import type { Metadata } from "next";
 
-export default function ServiceIndexPage() {
+export const metadata: Metadata = {
+  title: "提供サービス",
+  description: "メロンワークスの提供サービス一覧です。DX支援、Web制作、EC構築、デザイン制作など、お客様のビジネス課題に合わせたソリューションを提供します。",
+};
+
+// --- データ取得関数 ---
+// 全タグ情報を取得 (★追加)
+async function getTags() {
+    try {
+        const data = await client.get({ 
+            endpoint: "tags", 
+            queries: { limit: 100 } 
+        });
+        return data.contents;
+    } catch (e) {
+        return [];
+    }
+}
+
+export default async function ServiceIndexPage() {
+  // タグを取得 (★追加)
+  const allTags = await getTags();
+
+  // タグの振り分け処理関数
+  const getServiceTags = (serviceKey: string, type: "problem" | "solution") => {
+    return allTags
+      .filter((tag: any) => 
+        tag.type?.includes(type) && tag.related_services?.includes(serviceKey)
+      )
+      .map((tag: any) => tag.name);
+  };
   
-  // サービスデータ
+  // サービスデータ (★修正: APIタグを利用)
   const serviceItems = [
     { 
         id: "01",
+        key: "dx", // APIマッチング用キー
         icon: "shapes", 
         title: "業務設計・DX支援", 
         desc: "業務の流れや情報の分断を整理し、\n現場に無理のない仕組みを設計します。\nツール選定から運用定着まで、一緒に支援します。",
-        pTags: ["アナログ管理をやめたい", "人手不足"],
-        sTags: ["AI・自動化", "補助金活用"],
+        pTags: getServiceTags("dx", "problem").slice(0, 3), // 最大3つまで
+        sTags: getServiceTags("dx", "solution").slice(0, 3),
         href: "/service/dx"
     },
     { 
         id: "02",
+        key: "web",
         icon: "laptop-code", 
         title: "Webサイト制作", 
         desc: "コーポレートサイトやLPを、\n更新・運用しやすい形で設計・制作。\n使われ続けるWebを前提に考えます。",
-        pTags: ["集客できない", "売上が伸び悩んでいる"],
-        sTags: ["Web制作", "SNS運用"],
+        pTags: getServiceTags("web", "problem").slice(0, 3),
+        sTags: getServiceTags("web", "solution").slice(0, 3),
         href: "/service/web"
     },
     { 
         id: "03",
+        key: "ec",
         icon: "store", 
         title: "ECサイト構築・運用", 
         desc: "ECサイトの構築から、\n在庫や業務との連動、日々の運用まで。\n現場とつながる「売る仕組み」をつくります。",
-        pTags: ["在庫が合わない", "売上が伸び悩んでいる"],
-        sTags: ["ECサイト構築", "在庫管理システム"],
+        pTags: getServiceTags("ec", "problem").slice(0, 3),
+        sTags: getServiceTags("ec", "solution").slice(0, 3),
         href: "/service/ec"
     },
     { 
         id: "04",
+        key: "design",
         icon: "palette", 
         title: "デザイン制作", 
         desc: "紙・Webを問わず、\n運用や更新を前提にしたデザインを制作。\n現場で使われることを大切にしています。",
-        pTags: ["集客できない"],
-        sTags: ["SNS運用"],
+        pTags: getServiceTags("design", "problem").slice(0, 3),
+        sTags: getServiceTags("design", "solution").slice(0, 3),
         href: "/service/design"
     }
   ];
@@ -95,7 +131,6 @@ export default function ServiceIndexPage() {
                             
                             {/* 本文 */}
                             <div className="mb-4 relative z-10">
-                                {/* ★修正: text-xs -> text-sm */}
                                 <p className="text-sm text-gray-500 font-medium leading-relaxed whitespace-pre-wrap">
                                     {s.desc}
                                 </p>
@@ -103,17 +138,15 @@ export default function ServiceIndexPage() {
                             
                             {/* 関連タグ */}
                             <div className="pt-3 border-t border-gray-50 w-full relative z-10">
-                                {/* ★修正: text-[9px] -> text-xs */}
                                 <p className="text-xs text-gray-400 font-bold mb-2">関連タグ</p>
                                 <div className="flex flex-wrap gap-1.5">
-                                    {s.pTags.map((tag, idx) => (
-                                        /* ★修正: text-[9px] -> text-xs, padding調整 */
+                                    {/* ★修正: APIタグを表示 (型注釈追加) */}
+                                    {s.pTags.map((tag: any, idx: number) => (
                                         <span key={`p-${idx}`} className="text-[#E76F51] border border-red-50 bg-red-50/50 text-xs font-bold px-2 py-1 rounded backdrop-blur-sm">
                                             {tag}
                                         </span>
                                     ))}
-                                    {s.sTags.map((tag, idx) => (
-                                        /* ★修正: text-[9px] -> text-xs, padding調整 */
+                                    {s.sTags.map((tag: any, idx: number) => (
                                         <span key={`s-${idx}`} className="text-melon-dark border border-melon/10 bg-melon-light/20 text-xs font-bold px-2 py-1 rounded backdrop-blur-sm">
                                             {tag}
                                         </span>

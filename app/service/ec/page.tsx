@@ -12,12 +12,16 @@ export const metadata: Metadata = {
     description: "Shopify等のカートシステムやstripe等の決済システムを活用した、実用的なECサイトの構築から運用サポートまで。デザインはもちろん、受注処理や配送などのバックヤード業務の効率化も合わせてご提案します。",
   },
 };
-// --- データ取得: EC関連の記事を取得 ---
+
+// --- データ取得関数 ---
+
+// 1. EC関連の記事を取得
 async function getEcArticles() {
   try {
     const data = await client.get({
       endpoint: "article",
       queries: {
+        // EC、在庫管理、POS、Shopifyなどに関連する記事を取得
         filters: "solution_tags[contains]ECサイト構築[or]solution_tags[contains]在庫管理システム[or]solution_tags[contains]POSレジ[or]problem_tags[contains]在庫が合わない",
         limit: 3, 
         orders: "-publishedAt",
@@ -28,6 +32,19 @@ async function getEcArticles() {
   } catch (error) {
     return [];
   }
+}
+
+// 2. 全タグ情報を取得 (★追加)
+async function getTags() {
+    try {
+        const data = await client.get({ 
+            endpoint: "tags", 
+            queries: { limit: 100 } 
+        });
+        return data.contents;
+    } catch (e) {
+        return [];
+    }
 }
 
 // --- ヘルパー関数 ---
@@ -51,16 +68,21 @@ const formatDate = (dateStr: string) => {
 };
 
 export default async function EcServicePage() {
-  const ecArticles = await getEcArticles();
+  // 記事とタグを並行取得 (★修正)
+  const [ecArticles, allTags] = await Promise.all([
+      getEcArticles(),
+      getTags()
+  ]);
 
-  const relatedProblemTags = [
-      "在庫が合わない", "店舗とネットの管理が別", "売上が伸び悩んでいる", 
-      "受注処理が大変", "リピーターが増えない", "システムが使いにくい"
-  ];
-  const relatedSolutionTags = [
-      "ECサイト構築", "Shopify導入", "在庫連携(POS)", 
-      "LINE連携・CRM", "運営代行・サポート", "越境EC対応"
-  ];
+  // ★タグの自動抽出ロジック
+  // related_services に "ec" が含まれるタグのみを抽出
+  const relatedProblemTags = allTags
+      .filter((t: any) => t.type?.includes("problem") && t.related_services?.includes("ec"))
+      .map((t: any) => t.name);
+
+  const relatedSolutionTags = allTags
+      .filter((t: any) => t.type?.includes("solution") && t.related_services?.includes("ec"))
+      .map((t: any) => t.name);
 
   return (
     <main className="bg-white min-h-screen pt-14 md:pt-16 pb-20 font-sans">
@@ -75,7 +97,7 @@ export default async function EcServicePage() {
         ]}
       />
 
-      {/* FV Section (変更なし) */}
+      {/* FV Section */}
       <section className="relative py-20 md:py-32 overflow-hidden bg-[#FAFAFA]">
           <div className="absolute right-0 top-0 w-2/3 h-full bg-gradient-to-l from-melon-light/10 to-transparent pointer-events-none"></div>
           <div className="absolute right-[-10%] bottom-[-10%] w-[500px] h-[500px] bg-melon-light/20 rounded-full blur-[100px] pointer-events-none z-0"></div>
@@ -106,7 +128,7 @@ export default async function EcServicePage() {
           </div>
       </section>
 
-      {/* Introduction (変更なし) */}
+      {/* Introduction */}
       <section className="py-24 bg-white relative">
           <div className="container mx-auto px-4 md:px-6 max-w-6xl relative z-10">
               <div className="max-w-3xl mx-auto text-center">
@@ -124,7 +146,7 @@ export default async function EcServicePage() {
           </div>
       </section>
 
-      {/* ISSUES & SOLUTIONS (変更なし) */}
+      {/* ISSUES & SOLUTIONS (★修正: 自動取得タグを表示) */}
       <section className="py-24 bg-white relative overflow-hidden border-y border-gray-50">
            <div className="absolute left-0 top-0 w-[500px] h-[500px] bg-gray-50 rounded-full blur-3xl pointer-events-none -translate-x-1/2 -translate-y-1/2"></div>
            <div className="absolute right-0 bottom-0 w-[500px] h-[500px] bg-melon-light/10 rounded-full blur-3xl pointer-events-none translate-x-1/2 translate-y-1/2"></div>
@@ -137,6 +159,7 @@ export default async function EcServicePage() {
                </div>
 
                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+                   {/* 課題エリア */}
                    <div className="bg-[#FAFAFA]/95 border border-gray-100 p-8 rounded-2xl shadow-sm relative overflow-hidden hover:shadow-md transition-shadow">
                        <div className="flex items-center gap-4 mb-6">
                            <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center text-[#E76F51] text-xl shrink-0">
@@ -145,7 +168,8 @@ export default async function EcServicePage() {
                            <h3 className="font-bold text-lg text-[#264653]">抱えている課題</h3>
                        </div>
                        <div className="flex flex-wrap gap-2 relative z-10">
-                           {relatedProblemTags.map((tag, i) => (
+                           {/* ★修正: tag: string を追加 */}
+                           {relatedProblemTags.map((tag: string, i: number) => (
                                <Link key={i} href={`/search?tag=${encodeURIComponent(tag)}`} className="bg-white hover:bg-red-50 border border-red-100 text-[#E76F51] text-xs font-bold px-3 py-2 rounded-full transition-colors flex items-center gap-2 shadow-sm">
                                    {tag}
                                    <i className="fas fa-chevron-right text-[10px] opacity-50"></i>
@@ -153,6 +177,8 @@ export default async function EcServicePage() {
                            ))}
                        </div>
                    </div>
+
+                   {/* 解決策エリア */}
                    <div className="bg-melon-light/10 border border-melon/20 p-8 rounded-2xl shadow-sm relative overflow-hidden hover:shadow-md transition-shadow">
                        <div className="flex items-center gap-4 mb-6">
                            <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-melon-dark text-xl shadow-sm shrink-0">
@@ -161,7 +187,8 @@ export default async function EcServicePage() {
                            <h3 className="font-bold text-lg text-[#264653]">提供する解決策</h3>
                        </div>
                        <div className="flex flex-wrap gap-2 relative z-10">
-                           {relatedSolutionTags.map((tag, i) => (
+                           {/* ★修正: tag: string を追加 */}
+                           {relatedSolutionTags.map((tag: string, i: number) => (
                                <Link key={i} href={`/search?tag=${encodeURIComponent(tag)}`} className="bg-white hover:bg-melon-light/40 border border-melon/20 text-melon-dark text-xs font-bold px-3 py-2 rounded-full transition-colors flex items-center gap-2 shadow-sm">
                                    {tag}
                                    <i className="fas fa-chevron-right text-[10px] opacity-50"></i>
@@ -173,7 +200,7 @@ export default async function EcServicePage() {
            </div>
       </section>
 
-      {/* CASE STUDY (変更なし) */}
+      {/* CASE STUDY */}
       <section className="py-24 bg-[#FAFAFA] relative">
           <div className="container mx-auto px-4 md:px-6 max-w-6xl relative z-10">
                <div className="text-center mb-16">
@@ -198,11 +225,13 @@ export default async function EcServicePage() {
                                        />
                                        <div className="absolute inset-0 bg-gradient-to-t from-[#264653] via-[#264653]/40 to-transparent"></div>
                                    </div>
+                                   
                                    <div className="absolute top-4 left-4 z-20">
                                        <span className="bg-white text-[#264653] text-[10px] font-bold px-3 py-1 rounded-full shadow-sm">
                                            {categoryName}
                                        </span>
                                    </div>
+
                                    <div className="absolute bottom-0 p-6 z-10 w-full pointer-events-none">
                                        <time className="text-white text-xs font-en block mb-2 font-medium opacity-90 drop-shadow-sm">
                                            {formatDate(article.publishedAt || article.createdAt)}
@@ -210,6 +239,7 @@ export default async function EcServicePage() {
                                        <h3 className="font-bold text-lg leading-snug mb-3 text-white drop-shadow-md line-clamp-2">
                                            {article.title}
                                        </h3>
+                                       
                                        <div className="flex flex-wrap gap-1.5">
                                            {pTags.slice(0, 2).map((tag: any, i: number) => (
                                                <span key={`p-${i}`} className="bg-white text-[#E76F51] text-[9px] font-bold px-2 py-0.5 rounded shadow-sm border border-red-100">
@@ -273,11 +303,10 @@ export default async function EcServicePage() {
           </div>
       </section>
 
-      {/* CTA (★修正: コピー変更) */}
+      {/* CTA (変更なし) */}
       <section className="bg-gradient-to-br from-[#264653] to-[#2A9D8F] text-white py-24 relative overflow-hidden">
            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white/10 to-transparent pointer-events-none"></div>
           <div className="container mx-auto px-4 md:px-6 max-w-4xl text-center relative z-10">
-              {/* ★修正: 「売れる」→「事業の成長を支える」に変更 */}
               <h2 className="text-2xl md:text-4xl font-bold mb-6">事業の成長を支える、ECサイトをつくりませんか？</h2>
               <p className="text-white/80 mb-10 text-base md:text-lg leading-relaxed">
                   新規立ち上げから、既存サイトのリニューアル・カート移行まで。<br />

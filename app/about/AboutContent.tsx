@@ -41,28 +41,42 @@ export default function AboutContent() {
     { num: "05", en: "See in every resolution", jp: "あらゆる解像度で見る。", text: "広く、深く、正確に。粗くしても、細かくしても、本質を見失わない。" },
   ];
 
-  // メンバーデータ (ひらがな表記版)
+// メンバーデータ (画像パス削除、イニシャル追加)
   const members = [
     {
       name: "おこのぎ ゆうすけ",
       en: "Yusuke Okonogi",
-      role: "Representative / Producer",
-      image: "https://placehold.jp/eeeeee/cccccc/400x400.png?text=Y.Okonogi",
-      desc: "全体の統括および、ビジネス設計を担当。"
+      initial: "Y.O",
+      role: "CEO / Director",
+      desc: "ディレクター兼フロントエンドエンジニア。"
     },
     {
       name: "こばやし てつろう",
       en: "Tetsuro Kobayashi",
-      role: "Director / Engineer",
-      image: "https://placehold.jp/eeeeee/cccccc/400x400.png?text=T.Kobayashi",
-      desc: "技術選定およびシステム開発をリード。"
+      initial: "T.K",
+      role: "COO / Designer",
+      // ★修正: 文字列ではなくタグを含める形に変更
+      desc: (
+        <>
+          クリエイティブ制作担当、
+          <a 
+            href="https://ananda-yogaschool.com/" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="underline hover:text-melon-dark transition-colors"
+          >
+            Ananda Yoga
+          </a>
+          代表
+        </>
+      )
     },
     {
       name: "うちやま やすこ",
       en: "Yasuko Uchiyama",
-      role: "Designer / Backoffice",
-      image: "https://placehold.jp/eeeeee/cccccc/400x400.png?text=Y.Uchiyama",
-      desc: "クリエイティブ制作および組織運営を担当。"
+      initial: "Y.U",
+      role: "Designer / Engineer",
+      desc: "デザイナー兼フロントエンドエンジニア"
     }
   ];
 
@@ -80,7 +94,7 @@ export default function AboutContent() {
           <div className="container mx-auto px-4 md:px-6 max-w-6xl">
               
               <div className="text-center mb-10">
-                  <span className="text-melon-dark font-bold tracking-widest font-en text-xs uppercase mb-2 block">PHILOSOPHY</span>
+                  <span className="text-melon-dark font-bold tracking-widest font-en text-xs uppercase mb-2 block">MISSION VISION VALUE</span>
                   <h2 className="text-2xl font-bold text-[#264653] mb-4">企業理念</h2>
                   
                   <button onClick={toggleAll} className="inline-flex items-center gap-2 text-xs font-bold text-gray-400 hover:text-melon-dark transition-colors border border-gray-200 px-4 py-2 rounded-full hover:bg-gray-50 hover:border-gray-300">
@@ -133,7 +147,7 @@ export default function AboutContent() {
           </div>
       </section>
 
-      {/* MEMBERS Section */}
+      {/* MEMBERS Section (画像なしバージョン) */}
       <section id="members" className="py-16 bg-[#FAFAFA] border-b border-gray-100 relative scroll-mt-20">
           <div className="container mx-auto px-4 md:px-6 max-w-6xl">
               <div className="text-center mb-10">
@@ -141,29 +155,31 @@ export default function AboutContent() {
                   <h2 className="text-2xl font-bold text-[#264653]">メンバー紹介</h2>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
                   {members.map((member, i) => (
-                      <div key={i} className="group bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
-                          {/* 写真エリア */}
-                          <div className="aspect-square relative overflow-hidden bg-gray-100">
-                              <img 
-                                src={member.image} 
-                                alt={member.en} 
-                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
-                              />
+                      <div key={i} className="group bg-white rounded-xl border border-gray-100 p-6 md:p-8 hover:shadow-lg hover:border-melon-light/30 transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden">
+                          {/* 背景装飾 */}
+                          <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                              <i className="fas fa-user text-6xl text-melon-dark"></i>
                           </div>
-                          {/* 情報エリア */}
-                          <div className="p-6 text-center">
+
+                          <div className="text-center">
+                              {/* イニシャルサークル */}
+                              <div className="w-16 h-16 mx-auto bg-[#F9FAFB] rounded-full flex items-center justify-center text-xl font-bold font-en text-melon-dark border border-gray-100 mb-4 group-hover:bg-melon-light/20 group-hover:text-melon-dark transition-colors">
+                                  {member.initial}
+                              </div>
+
                               {/* 役職 */}
-                              <p className="text-[10px] text-melon-dark font-bold font-en tracking-wider mb-2 uppercase">{member.role}</p>
+                              <p className="text-[10px] text-melon-dark font-bold font-en tracking-wider mb-2 uppercase opacity-80">{member.role}</p>
                               
-                              {/* 名前 (英語メイン) */}
-                              <h3 className="text-xl font-bold text-[#264653] font-en mb-1">{member.en}</h3>
+                              {/* 名前 (英語) */}
+                              <h3 className="text-lg font-bold text-[#264653] font-en mb-1">{member.en}</h3>
                               
-                              {/* 名前 (ひらがなサブ) */}
+                              {/* 名前 (ひらがな) */}
                               <p className="text-xs text-gray-400 font-medium mb-4 tracking-wider">{member.name}</p>
                               
-                              <div className="w-8 h-[2px] bg-melon-light mx-auto mb-4"></div>
+                              <div className="w-6 h-[2px] bg-gray-100 mx-auto mb-4 group-hover:bg-melon-light transition-colors"></div>
+                              
                               <p className="text-xs text-gray-600 leading-relaxed font-medium">
                                   {member.desc}
                               </p>

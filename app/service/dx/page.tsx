@@ -13,12 +13,15 @@ export const metadata: Metadata = {
   },
 };
 
-// --- データ取得: DX関連の記事を取得 ---
+// --- データ取得関数 ---
+
+// 1. DX関連の記事を取得
 async function getDxArticles() {
   try {
     const data = await client.get({
       endpoint: "article",
       queries: {
+        // DX、業務効率化、アナログ管理などに関連する記事を取得
         filters: "problem_tags[contains]アナログ管理[or]solution_tags[contains]DX[or]solution_tags[contains]業務効率化",
         limit: 3, 
         orders: "-publishedAt",
@@ -29,6 +32,19 @@ async function getDxArticles() {
   } catch (error) {
     return [];
   }
+}
+
+// 2. 全タグ情報を取得 (★追加)
+async function getTags() {
+    try {
+        const data = await client.get({ 
+            endpoint: "tags", 
+            queries: { limit: 100 } 
+        });
+        return data.contents;
+    } catch (e) {
+        return [];
+    }
 }
 
 // --- ヘルパー関数 ---
@@ -52,17 +68,21 @@ const formatDate = (dateStr: string) => {
 };
 
 export default async function DxServicePage() {
-  const dxArticles = await getDxArticles();
+  // 記事とタグを並行取得 (★修正)
+  const [dxArticles, allTags] = await Promise.all([
+      getDxArticles(),
+      getTags()
+  ]);
 
-  // このサービスに関連するタグ定義
-  const relatedProblemTags = [
-      "アナログ管理をやめたい", "人手不足", "属人化している", 
-      "ミスが減らない", "情報共有ができない", "ツールが使いこなせない"
-  ];
-  const relatedSolutionTags = [
-      "業務設計", "DX支援", "AI・自動化", 
-      "ツール選定", "マニュアル作成", "定着支援"
-  ];
+  // ★タグの自動抽出ロジック
+  // related_services に "dx" が含まれるタグのみを抽出
+  const relatedProblemTags = allTags
+      .filter((t: any) => t.type?.includes("problem") && t.related_services?.includes("dx"))
+      .map((t: any) => t.name);
+
+  const relatedSolutionTags = allTags
+      .filter((t: any) => t.type?.includes("solution") && t.related_services?.includes("dx"))
+      .map((t: any) => t.name);
 
   return (
     <main className="bg-white min-h-screen pt-14 md:pt-16 pb-20 font-sans">
@@ -100,7 +120,7 @@ export default async function DxServicePage() {
                       </p>
                   </div>
                   <div className="w-full md:w-1/2 relative">
-                      <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl border border-gray-100 ">
+                      <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl border border-gray-100 bg-white">
                           <img src="../img_dx.png" alt="DX支援のイメージ" className="w-full h-full object-cover" />
                       </div>
                   </div>
@@ -126,9 +146,8 @@ export default async function DxServicePage() {
           </div>
       </section>
 
-      {/* ▼▼▼ ISSUES & SOLUTIONS (トップページのデザインを踏襲) ▼▼▼ */}
+      {/* ISSUES & SOLUTIONS (★修正: 自動取得タグを表示) */}
       <section className="py-24 bg-white relative overflow-hidden border-y border-gray-50">
-           {/* 背景あしらい */}
            <div className="absolute left-0 top-0 w-[500px] h-[500px] bg-gray-50 rounded-full blur-3xl pointer-events-none -translate-x-1/2 -translate-y-1/2"></div>
            <div className="absolute right-0 bottom-0 w-[500px] h-[500px] bg-melon-light/10 rounded-full blur-3xl pointer-events-none translate-x-1/2 translate-y-1/2"></div>
 
@@ -140,7 +159,7 @@ export default async function DxServicePage() {
                </div>
 
                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-                   {/* 課題エリア (Top Page Style: White/Gray base + Red accent) */}
+                   {/* 課題エリア */}
                    <div className="bg-[#FAFAFA]/95 border border-gray-100 p-8 rounded-2xl shadow-sm relative overflow-hidden hover:shadow-md transition-shadow">
                        <div className="flex items-center gap-4 mb-6">
                            <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center text-[#E76F51] text-xl shrink-0">
@@ -149,7 +168,7 @@ export default async function DxServicePage() {
                            <h3 className="font-bold text-lg text-[#264653]">抱えている課題</h3>
                        </div>
                        <div className="flex flex-wrap gap-2 relative z-10">
-                           {relatedProblemTags.map((tag, i) => (
+                           {relatedProblemTags.map((tag: string, i: number) => (
                                <Link key={i} href={`/search?tag=${encodeURIComponent(tag)}`} className="bg-white hover:bg-red-50 border border-red-100 text-[#E76F51] text-xs font-bold px-3 py-2 rounded-full transition-colors flex items-center gap-2 shadow-sm">
                                    {tag}
                                    <i className="fas fa-chevron-right text-[10px] opacity-50"></i>
@@ -158,7 +177,7 @@ export default async function DxServicePage() {
                        </div>
                    </div>
 
-                   {/* 解決策エリア (Top Page Style: Melon base + Melon accent) */}
+                   {/* 解決策エリア */}
                    <div className="bg-melon-light/10 border border-melon/20 p-8 rounded-2xl shadow-sm relative overflow-hidden hover:shadow-md transition-shadow">
                        <div className="flex items-center gap-4 mb-6">
                            <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-melon-dark text-xl shadow-sm shrink-0">
@@ -167,7 +186,7 @@ export default async function DxServicePage() {
                            <h3 className="font-bold text-lg text-[#264653]">提供する解決策</h3>
                        </div>
                        <div className="flex flex-wrap gap-2 relative z-10">
-                           {relatedSolutionTags.map((tag, i) => (
+                           {relatedSolutionTags.map((tag: string, i: number) => (
                                <Link key={i} href={`/search?tag=${encodeURIComponent(tag)}`} className="bg-white hover:bg-melon-light/40 border border-melon/20 text-melon-dark text-xs font-bold px-3 py-2 rounded-full transition-colors flex items-center gap-2 shadow-sm">
                                    {tag}
                                    <i className="fas fa-chevron-right text-[10px] opacity-50"></i>
@@ -250,7 +269,7 @@ export default async function DxServicePage() {
           </div>
       </section>
 
-      {/* Flow */}
+      {/* Flow (変更なし) */}
       <section className="py-24 bg-white relative">
           <div className="container mx-auto px-4 md:px-6 max-w-4xl relative z-10">
                <div className="text-center mb-16">
@@ -282,7 +301,7 @@ export default async function DxServicePage() {
           </div>
       </section>
 
-      {/* CTA */}
+      {/* CTA (変更なし) */}
       <section className="bg-gradient-to-br from-[#264653] to-[#2A9D8F] text-white py-24 relative overflow-hidden">
            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white/10 to-transparent pointer-events-none"></div>
           <div className="container mx-auto px-4 md:px-6 max-w-4xl text-center relative z-10">
@@ -292,7 +311,7 @@ export default async function DxServicePage() {
                   御社の課題に合わせた最適なDXプランをご提案します。
               </p>
               <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6">
-                  <Link href="#" className="bg-white text-melon-dark font-bold py-4 px-10 rounded-full hover:bg-melon-dark hover:text-white hover:shadow-lg transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2 group">
+                  <Link href="/contact" className="bg-white text-melon-dark font-bold py-4 px-10 rounded-full hover:bg-melon-dark hover:text-white hover:shadow-lg transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2 group">
                       <i className="far fa-envelope group-hover:rotate-12 transition-transform"></i> 無料相談・お問い合わせ
                   </Link>
               </div>

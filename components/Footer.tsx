@@ -1,100 +1,181 @@
 import Link from 'next/link';
+import { client } from "@/libs/client";
 
-export default function Footer() {
+// --- データ取得関数 ---
+async function getTags() {
+    try {
+        const data = await client.get({ 
+            endpoint: "tags", 
+            queries: { limit: 100 } 
+        });
+        return data.contents;
+    } catch (e) {
+        return [];
+    }
+}
+
+// サービス定義
+const services = [
+    { name: "業務設計・DX支援", path: "/service/dx" },
+    { name: "Webサイト制作", path: "/service/web" },
+    { name: "ECサイト構築・運用", path: "/service/ec" },
+    { name: "デザイン制作", path: "/service/design" },
+];
+
+export default async function Footer() {
+  // タグデータを取得
+  const allTags = await getTags();
+
+  // タグを分類
+  const problemTags = allTags
+      .filter((t: any) => t.type?.includes("problem"))
+      .map((t: any) => t.name)
+      .slice(0, 8);
+
+  const solutionTags = allTags
+      .filter((t: any) => t.type?.includes("solution"))
+      .map((t: any) => t.name)
+      .slice(0, 8);
+
   return (
-    // ★修正: pb-8 -> pb-24 (固定バーの分だけ余白を確保)
-    <footer className="bg-white border-t border-gray-100 pt-16 pb-24">
-        <div className="container mx-auto px-4 md:px-6 max-w-6xl">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
-                <div className="col-span-1 md:col-span-1">
-                    <div className="flex items-center gap-3 mb-6">
-                        <img src="/logo-gr.png" alt="Melon Works" className="h-6 w-auto grayscale opacity-80 hover:grayscale-0 hover:opacity-100 transition-all" />
+    <div className="bg-[#F9FAFB] pt-10">
+        
+        <footer className="bg-white rounded-t-[40px] md:rounded-t-[60px] shadow-[0_-10px_40px_rgba(0,0,0,0.02)] relative overflow-hidden pb-12">
+            
+            {/* 背景装飾 */}
+            <div className="absolute right-[-5%] bottom-[-20%] text-[200px] md:text-[300px] text-melon-light opacity-10 pointer-events-none rotate-12 z-0">
+                <i className="fas fa-shapes"></i>
+            </div>
+
+            <div className="container mx-auto px-6 md:px-10 max-w-6xl relative z-10 pt-16 md:pt-20">
+                
+                <div className="flex flex-col lg:flex-row gap-12 mb-16 items-start">
+                    
+                    {/* 左側：ブランド & 会社情報 */}
+                    <div className="lg:w-1/4 flex-shrink-0">
+                        <Link href="/" className="inline-block mb-8 group shrink-0">
+                            {/* ロゴ修正: object-contain と height 指定で比率を維持 */}
+                            <img 
+                                src="/logo-gr.png" 
+                                alt="Melon Works" 
+                                className="h-7 md:h-9 w-auto object-contain transition-transform duration-300 group-hover:scale-105 grayscale opacity-80 hover:grayscale-0 hover:opacity-100" 
+                            />
+                        </Link>
+                        
+                        {/* 所在地情報 */}
+                        <div className="text-xs text-gray-500 leading-loose font-medium space-y-6">
+                            <div>
+                                <span className="inline-block bg-gray-100 text-gray-600 text-[10px] font-bold px-2 py-0.5 rounded mb-1">本社</span>
+                                <p>
+                                    〒371-0831<br />
+                                    群馬県前橋市小相木町327<br />
+                                    タカゼンビル203
+                                </p>
+                            </div>
+                            <div>
+                                <span className="inline-block bg-gray-100 text-gray-600 text-[10px] font-bold px-2 py-0.5 rounded mb-1">東京拠点</span>
+                                <p>
+                                    〒106-0032<br />
+                                    東京都港区六本木6-8-23
+                                </p>
+                            </div>
+                            
+                            <Link href="/contact" className="inline-flex items-center gap-2 text-melon-dark hover:underline font-bold pt-2">
+                                <i className="far fa-envelope"></i> お問い合わせはこちら
+                            </Link>
+                        </div>
                     </div>
-                    <div className="flex gap-4 mb-6">
-                        <a href="#" className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-melon-dark hover:text-white transition-colors">
-                            <i className="fab fa-twitter"></i>
-                        </a>
-                        <a href="#" className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-melon-dark hover:text-white transition-colors">
-                            <i className="fab fa-facebook-f"></i>
-                        </a>
-                        <a href="#" className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-melon-dark hover:text-white transition-colors">
-                            <i className="fas fa-note-sticky"></i>
-                        </a>
+
+                    {/* 右側：ナビゲーションリンク (TAGSを左に配置) */}
+                    <div className="lg:w-3/4 w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10">
+                        
+                        {/* Column 1 & 2: TAGS (Issues & Solutions) - 2列分使用 */}
+                        <div className="lg:col-span-2">
+                            <h4 className="font-bold mb-5 text-xs font-en tracking-widest text-[#264653] flex items-center gap-2">
+                                <span className="w-2 h-2 bg-melon-dark rounded-full"></span> TAGS
+                            </h4>
+                            
+                            <div className="space-y-6">
+                                {/* 課題タグ */}
+                                <div>
+                                    <p className="text-[10px] font-bold text-gray-400 mb-2 pl-1">ISSUES</p>
+                                    <div className="flex flex-wrap gap-2">
+                                        {problemTags.map((tag: string, i: number) => (
+                                            <Link key={i} href={`/search?tag=${encodeURIComponent(tag)}`} className="bg-white text-[#E76F51] text-[10px] font-bold px-2.5 py-1.5 rounded shadow-sm border border-red-100 hover:shadow-md hover:-translate-y-0.5 transition-all">
+                                                {tag}
+                                            </Link>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* 解決策タグ */}
+                                <div>
+                                    <p className="text-[10px] font-bold text-gray-400 mb-2 pl-1">SOLUTIONS</p>
+                                    <div className="flex flex-wrap gap-2">
+                                        {solutionTags.map((tag: string, i: number) => (
+                                            <Link key={i} href={`/search?tag=${encodeURIComponent(tag)}`} className="bg-white text-melon-dark text-[10px] font-bold px-2.5 py-1.5 rounded shadow-sm border border-melon/20 hover:shadow-md hover:-translate-y-0.5 transition-all">
+                                                {tag}
+                                            </Link>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Column 3: SERVICE */}
+                        <div>
+                            <h4 className="font-bold mb-5 text-xs font-en tracking-widest text-[#264653] flex items-center gap-2">
+                                <span className="w-2 h-2 bg-gray-400 rounded-full"></span> SERVICE
+                            </h4>
+                            <ul className="space-y-3">
+                                {services.map((item, i) => (
+                                    <li key={i}>
+                                        <Link href={item.path} className="text-xs text-gray-500 hover:text-melon-dark transition-all flex items-center gap-2 group">
+                                            <span className="w-1 h-1 bg-gray-300 rounded-full group-hover:bg-melon-dark group-hover:w-2 transition-all"></span>
+                                            {item.name}
+                                        </Link>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+
+                        {/* Column 4: COMPANY */}
+                        <div>
+                            <h4 className="font-bold mb-5 text-xs font-en tracking-widest text-[#264653] flex items-center gap-2">
+                                <span className="w-2 h-2 bg-gray-400 rounded-full"></span> COMPANY
+                            </h4>
+                            <ul className="space-y-3">
+                                {[
+                                    { name: "会社案内", path: "/about" },
+                                    { name: "お問い合わせ", path: "/contact" },
+                                    { name: "利用規約", path: "/terms" },
+                                    { name: "プライバシーポリシー", path: "/privacy" },
+                                    { name: "反社基本方針", path: "/antisocial" }
+                                ].map((item, i) => (
+                                    <li key={i}>
+                                        <Link href={item.path} className="text-xs text-gray-500 hover:text-melon-dark transition-all flex items-center gap-2 group">
+                                            <span className="w-1 h-1 bg-gray-300 rounded-full group-hover:bg-melon-dark group-hover:w-2 transition-all"></span>
+                                            {item.name}
+                                        </Link>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+
                     </div>
-                    <p className="text-xs text-gray-500 leading-relaxed">
-                        第三者目線と現場経験を武器に、アパレルから不動産、政治活動まであらゆる領域の課題を解決する「Webの何でも屋」です。
+                </div>
+
+                {/* Copyright */}
+                <div className="border-t border-gray-100 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+                    <p className="text-[10px] text-gray-400 font-en tracking-wider">
+                        &copy; 2025 Melon Works LLC.
+                    </p>
+                    <p className="text-[10px] text-gray-300 font-en hidden md:block">
+                        Less is more.
                     </p>
                 </div>
-                <div>
-                    <h4 className="font-bold mb-6 text-xs font-en tracking-wider text-[#264653] border-b border-gray-100 pb-2 inline-block">ROLE</h4>
-                    <ul className="text-xs text-gray-500 space-y-3">
-                        <li>
-                            <Link href="#" className="hover:text-melon-dark transition-colors flex items-center gap-1 group">
-                                <i className="fas fa-chevron-right text-[8px] opacity-0 group-hover:opacity-100 transition-opacity"></i> 経営者・オーナー
-                            </Link>
-                        </li>
-                        <li>
-                            <Link href="#" className="hover:text-melon-dark transition-colors flex items-center gap-1 group">
-                                <i className="fas fa-chevron-right text-[8px] opacity-0 group-hover:opacity-100 transition-opacity"></i> 店舗責任者・店長
-                            </Link>
-                        </li>
-                        <li>
-                            <Link href="#" className="hover:text-melon-dark transition-colors flex items-center gap-1 group">
-                                <i className="fas fa-chevron-right text-[8px] opacity-0 group-hover:opacity-100 transition-opacity"></i> EC担当者
-                            </Link>
-                        </li>
-                    </ul>
-                </div>
-                <div>
-                     <h4 className="font-bold mb-6 text-xs font-en tracking-wider text-[#264653] border-b border-gray-100 pb-2 inline-block">TOPIC</h4>
-                    <ul className="text-xs text-gray-500 space-y-3">
-                        <li>
-                            <Link href="#" className="hover:text-melon-dark transition-colors flex items-center gap-1 group">
-                                <i className="fas fa-chevron-right text-[8px] opacity-0 group-hover:opacity-100 transition-opacity"></i> 在庫管理・POS
-                            </Link>
-                        </li>
-                        <li>
-                            <Link href="#" className="hover:text-melon-dark transition-colors flex items-center gap-1 group">
-                                <i className="fas fa-chevron-right text-[8px] opacity-0 group-hover:opacity-100 transition-opacity"></i> DX・業務効率化
-                            </Link>
-                        </li>
-                        <li>
-                            <Link href="#" className="hover:text-melon-dark transition-colors flex items-center gap-1 group">
-                                <i className="fas fa-chevron-right text-[8px] opacity-0 group-hover:opacity-100 transition-opacity"></i> Web制作・運用
-                            </Link>
-                        </li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 className="font-bold mb-6 text-xs font-en tracking-wider text-[#264653] border-b border-gray-100 pb-2 inline-block">COMPANY</h4>
-                    <ul className="text-xs text-gray-500 space-y-3">
-                        <li>
-                            <Link href="/about" className="hover:text-melon-dark transition-colors flex items-center gap-1 group">
-                                <i className="fas fa-chevron-right text-[8px] opacity-0 group-hover:opacity-100 transition-opacity"></i> 会社概要
-                            </Link>
-                        </li>
-                        <li>
-                            <Link href="#" className="hover:text-melon-dark transition-colors flex items-center gap-1 group">
-                                <i className="fas fa-chevron-right text-[8px] opacity-0 group-hover:opacity-100 transition-opacity"></i> お問い合わせ
-                            </Link>
-                        </li>
-                        <li>
-                            <Link href="/privacy" className="hover:text-melon-dark transition-colors flex items-center gap-1 group">
-                                <i className="fas fa-chevron-right text-[8px] opacity-0 group-hover:opacity-100 transition-opacity"></i> プライバシーポリシー
-                            </Link>
-                        </li>
-                        <li>
-                            <Link href="/antisocial" className="hover:text-melon-dark transition-colors flex items-center gap-1 group">
-                                <i className="fas fa-chevron-right text-[8px] opacity-0 group-hover:opacity-100 transition-opacity"></i> 反社基本方針
-                            </Link>
-                        </li>
-                    </ul>
-                </div>
             </div>
-            <div className="text-center text-[10px] text-gray-400 border-t border-gray-100 pt-8 font-en">
-                &copy; 2025 MelonWorks. All Rights Reserved.
-            </div>
-        </div>
-    </footer>
+        </footer>
+    </div>
   );
 }
