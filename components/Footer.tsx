@@ -40,7 +40,7 @@ export default async function Footer() {
   return (
     <div className="bg-[#F9FAFB] pt-10">
         
-        {/* ★修正: スマホ時のみ下部余白を大きく確保 (pb-32 md:pb-12) */}
+        {/* スマホ時のみ下部余白を大きく確保 (pb-32 md:pb-12) */}
         <footer className="bg-white rounded-t-[40px] md:rounded-t-[60px] shadow-[0_-10px_40px_rgba(0,0,0,0.02)] relative overflow-hidden pb-32 md:pb-12">
             
             {/* 背景装飾 */}
@@ -55,13 +55,19 @@ export default async function Footer() {
                     {/* 左側：ブランド & 会社情報 */}
                     <div className="lg:w-1/4 flex-shrink-0">
                         <Link href="/" className="inline-block mb-8 group shrink-0">
+                            {/* ★修正: ロゴサイズを小さく (h-5 md:h-6) */}
                             <img 
                                 src="/logo-gr.png" 
                                 alt="Melon Works" 
-                                className="h-7 md:h-9 w-auto object-contain transition-transform duration-300 group-hover:scale-105 grayscale opacity-80 hover:grayscale-0 hover:opacity-100" 
+                                className="h-5 md:h-6 w-auto object-contain transition-transform duration-300 group-hover:scale-105 grayscale opacity-80 hover:grayscale-0 hover:opacity-100" 
                             />
+                            {/* ★追加: 日本語社名 */}
+                            <p className="text-[10px] font-bold text-gray-400 mt-1.5 tracking-wider group-hover:text-melon-dark transition-colors">
+                                メロンワークス合同会社
+                            </p>
                         </Link>
                         
+                        {/* 所在地情報 */}
                         <div className="text-xs text-gray-500 leading-loose font-medium space-y-6">
                             <div>
                                 <span className="inline-block bg-gray-100 text-gray-600 text-[10px] font-bold px-2 py-0.5 rounded mb-1">本社</span>
@@ -85,10 +91,10 @@ export default async function Footer() {
                         </div>
                     </div>
 
-                    {/* 右側：ナビゲーションリンク */}
+                    {/* 右側：ナビゲーションリンク (TAGSを左に配置) */}
                     <div className="lg:w-3/4 w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10">
                         
-                        {/* TAGS (Issues & Solutions) */}
+                        {/* Column 1 & 2: TAGS (Issues & Solutions) - 2列分使用 */}
                         <div className="lg:col-span-2">
                             <h4 className="font-bold mb-5 text-xs font-en tracking-widest text-[#264653] flex items-center gap-2">
                                 <span className="w-2 h-2 bg-melon-dark rounded-full"></span> TAGS
@@ -121,7 +127,7 @@ export default async function Footer() {
                             </div>
                         </div>
 
-                        {/* SERVICE */}
+                        {/* Column 3: SERVICE */}
                         <div>
                             <h4 className="font-bold mb-5 text-xs font-en tracking-widest text-[#264653] flex items-center gap-2">
                                 <span className="w-2 h-2 bg-gray-400 rounded-full"></span> SERVICE
@@ -138,7 +144,7 @@ export default async function Footer() {
                             </ul>
                         </div>
 
-                        {/* COMPANY */}
+                        {/* Column 4: COMPANY */}
                         <div>
                             <h4 className="font-bold mb-5 text-xs font-en tracking-widest text-[#264653] flex items-center gap-2">
                                 <span className="w-2 h-2 bg-gray-400 rounded-full"></span> COMPANY
