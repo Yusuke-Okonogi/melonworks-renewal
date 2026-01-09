@@ -18,24 +18,32 @@ const SERVICE_DEFINITIONS = [
 
 // 1. 通常の新着記事を取得
 async function getNews() {
-  const data = await client.get({ 
-    endpoint: "article",
-    queries: { limit: 6, orders: "-publishedAt" }
-  });
-  return data.contents;
+  try {
+    const data = await client.get({ 
+      endpoint: "article",
+      queries: { limit: 6, orders: "-publishedAt" }
+    });
+    return data.contents;
+  } catch (e) {
+    return [];
+  }
 }
 
 // 2. ピックアップ記事のみを取得
 async function getPickupArticles() {
-  const data = await client.get({
-    endpoint: "article",
-    queries: { 
-      filters: "pickup[equals]true",
-      limit: 5,
-      orders: "-publishedAt"
-    }
-  });
-  return data.contents;
+  try {
+    const data = await client.get({
+      endpoint: "article",
+      queries: { 
+        filters: "pickup[equals]true",
+        limit: 5,
+        orders: "-publishedAt"
+      }
+    });
+    return data.contents;
+  } catch (e) {
+    return [];
+  }
 }
 
 // 3. 全タグ情報を取得
@@ -63,15 +71,13 @@ const formatDate = (dateStr: string) => {
     return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`;
 };
 
-// ★追加: カテゴリ名決定ロジック (タグからサービスを逆引き)
+// カテゴリ名決定ロジック
 const getDisplayCategory = (article: any, allTags: any[]) => {
-    // 1. カテゴリが明示的に設定されていればそれを優先
     if (article.category) {
         if (Array.isArray(article.category) && article.category[0]) return article.category[0].name;
         if (typeof article.category === 'object') return article.category.name;
     }
 
-    // 2. カテゴリがない場合、記事のタグを見てサービスを推定
     const articleTags = [
         ...(article.problem_tags || []),
         ...(article.solution_tags || [])
@@ -158,7 +164,7 @@ export default async function Home() {
       {/* FV Section */}
       <section className="bg-[#FAFAFA] relative lg:min-h-[calc(100vh-64px)] min-h-[600px] flex flex-col justify-center py-10 lg:py-20">
           <div className="absolute inset-0 z-0 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(38, 70, 83, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(38, 70, 83, 0.05) 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
-          <div className="absolute right-[-60%] md:right-[-40%] lg:right-[-10%] top-10 lg:top-[10%] w-[90%] lg:w-[50%] h-[50%] lg:h-[80%] z-0 pointer-events-none">
+          <div className="absolute right-[-40%] md:right-[-40%] lg:right-[-10%] top-30 lg:top-[10%] w-[90%] lg:w-[50%] h-[50%] lg:h-[80%] z-0 pointer-events-none">
               <img src="/fv-illustration.png" alt="DX Illustration" className="w-full h-full object-contain object-right-top opacity-80 lg:opacity-80" />
           </div>
           <div className="absolute right-0 bottom-0 w-[600px] h-[600px] bg-melon-light/30 rounded-full blur-[120px] pointer-events-none translate-x-1/3 translate-y-1/3 z-0"></div>
@@ -185,57 +191,60 @@ export default async function Home() {
                           <i className="fas fa-palette text-melon-dark/50"></i> デザイン制作
                       </Link>
                   </div>
-                  <div className="flex gap-3">
-                      <button className="w-10 h-10 lg:w-12 lg:h-12 rounded-full border border-gray-200 bg-white flex items-center justify-center text-gray-600 hover:border-melon-dark hover:text-melon-dark transition-all shadow-sm"><i className="fas fa-chevron-left text-sm lg:text-base"></i></button>
-                      <button className="w-10 h-10 lg:w-12 lg:h-12 rounded-full border border-gray-200 bg-white flex items-center justify-center text-gray-600 hover:border-melon-dark hover:text-melon-dark transition-all shadow-sm"><i className="fas fa-chevron-right text-sm lg:text-base"></i></button>
-                  </div>
+                  
+                  {/* ★修正: Pickupsがあればスライダー操作ボタンを表示 */}
+                  {pickups.length > 0 && (
+                    <div className="flex gap-3">
+                        <button className="w-10 h-10 lg:w-12 lg:h-12 rounded-full border border-gray-200 bg-white flex items-center justify-center text-gray-600 hover:border-melon-dark hover:text-melon-dark transition-all shadow-sm"><i className="fas fa-chevron-left text-sm lg:text-base"></i></button>
+                        <button className="w-10 h-10 lg:w-12 lg:h-12 rounded-full border border-gray-200 bg-white flex items-center justify-center text-gray-600 hover:border-melon-dark hover:text-melon-dark transition-all shadow-sm"><i className="fas fa-chevron-right text-sm lg:text-base"></i></button>
+                    </div>
+                  )}
               </div>
 
-              {/* スライダー (Pickup記事) */}
-              <div className="w-full z-20">
-                  <div className="flex gap-4 lg:gap-6 overflow-x-auto snap-x-mandatory scrollbar-hide py-2 px-1 pb-4">
-                      {pickups.map((article: any) => {
-                           const pTags = article.problem_tags ? (Array.isArray(article.problem_tags) ? article.problem_tags : [article.problem_tags]) : [];
-                           const sTags = article.solution_tags ? (Array.isArray(article.solution_tags) ? article.solution_tags : [article.solution_tags]) : [];
-                           
-                           // ★修正: カテゴリ名を自動判定
-                           const categoryName = getDisplayCategory(article, allTags);
-                           
-                           return (
-                              <div key={article.id} className="min-w-[260px] md:min-w-[320px] snap-center group relative overflow-hidden rounded-2xl shadow-md h-[260px] md:h-[300px] hover:-translate-y-1 transition-transform duration-300 bg-white flex-shrink-0">
-                                  <Link href={`/article/${article.id}`} className="absolute inset-0 z-0 block" />
-                                  <div className="absolute inset-0 pointer-events-none">
-                                      <img src={article.thumnail?.url || article.thumbnail?.url || article.image?.url || article.eyecatch?.url || "https://placehold.jp/eeeeee/999999/600x400.png?text=No+Image"} alt={article.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-                                      <div className="absolute inset-0 bg-gradient-to-t from-[#264653] via-[#264653]/40 to-transparent"></div>
-                                  </div>
-                                  <div className="absolute top-4 left-4 z-20 pointer-events-none">
-                                      <span className="bg-white text-[#264653] text-xs font-bold px-3 py-1 rounded-full shadow-sm">
-                                        {categoryName}
-                                      </span>
-                                  </div>
-                                  <div className="absolute bottom-0 p-5 z-10 w-full pointer-events-none">
-                                      <time className="text-white text-xs font-en block mb-2 font-medium opacity-90 drop-shadow-sm">{formatDate(article.publishedAt || article.createdAt)}</time>
-                                      <h3 className="font-bold text-lg md:text-xl leading-snug mb-3 text-white drop-shadow-md line-clamp-2">{article.title}</h3>
-                                      
-                                      {/* ★修正: 課題・解決策タグをそれぞれ最大1つずつ表示 */}
-                                      <div className="flex flex-wrap gap-2">
-                                        {pTags.slice(0, 1).map((tag: any, i: number) => (
-                                            <span key={`p-${i}`} className="bg-white text-[#E76F51] text-xs font-bold px-2.5 py-1 rounded shadow-sm relative z-20">
-                                                {getTagName(tag)}
-                                            </span>
-                                        ))}
-                                        {sTags.slice(0, 1).map((tag: any, i: number) => (
-                                            <span key={`s-${i}`} className="bg-white text-melon-dark text-xs font-bold px-2.5 py-1 rounded shadow-sm relative z-20">
-                                                {getTagName(tag)}
-                                            </span>
-                                        ))}
-                                      </div>
-                                  </div>
-                              </div>
-                           );
-                      })}
-                  </div>
-              </div>
+              {/* ★修正: Pickups記事がある場合のみスライダーを表示 */}
+              {pickups.length > 0 && (
+                <div className="w-full z-20">
+                    <div className="flex gap-4 lg:gap-6 overflow-x-auto snap-x-mandatory scrollbar-hide py-2 px-1 pb-4">
+                        {pickups.map((article: any) => {
+                             const pTags = article.problem_tags ? (Array.isArray(article.problem_tags) ? article.problem_tags : [article.problem_tags]) : [];
+                             const sTags = article.solution_tags ? (Array.isArray(article.solution_tags) ? article.solution_tags : [article.solution_tags]) : [];
+                             const categoryName = getDisplayCategory(article, allTags);
+                             
+                             return (
+                                <div key={article.id} className="min-w-[260px] md:min-w-[320px] snap-center group relative overflow-hidden rounded-2xl shadow-md h-[260px] md:h-[300px] hover:-translate-y-1 transition-transform duration-300 bg-white flex-shrink-0">
+                                    <Link href={`/article/${article.id}`} className="absolute inset-0 z-0 block" />
+                                    <div className="absolute inset-0 pointer-events-none">
+                                        <img src={article.thumnail?.url || article.thumbnail?.url || article.image?.url || article.eyecatch?.url || "https://placehold.jp/eeeeee/999999/600x400.png?text=No+Image"} alt={article.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-[#264653] via-[#264653]/40 to-transparent"></div>
+                                    </div>
+                                    <div className="absolute top-4 left-4 z-20 pointer-events-none">
+                                        <span className="bg-white text-[#264653] text-xs font-bold px-3 py-1 rounded-full shadow-sm">
+                                          {categoryName}
+                                        </span>
+                                    </div>
+                                    <div className="absolute bottom-0 p-5 z-10 w-full pointer-events-none">
+                                        <time className="text-white text-xs font-en block mb-2 font-medium opacity-90 drop-shadow-sm">{formatDate(article.publishedAt || article.createdAt)}</time>
+                                        <h3 className="font-bold text-lg md:text-xl leading-snug mb-3 text-white drop-shadow-md line-clamp-2">{article.title}</h3>
+                                        
+                                        <div className="flex flex-wrap gap-2">
+                                          {pTags.slice(0, 1).map((tag: any, i: number) => (
+                                              <span key={`p-${i}`} className="bg-white text-[#E76F51] text-xs font-bold px-2.5 py-1 rounded shadow-sm relative z-20">
+                                                  {getTagName(tag)}
+                                              </span>
+                                          ))}
+                                          {sTags.slice(0, 1).map((tag: any, i: number) => (
+                                              <span key={`s-${i}`} className="bg-white text-melon-dark text-xs font-bold px-2.5 py-1 rounded shadow-sm relative z-20">
+                                                  {getTagName(tag)}
+                                              </span>
+                                          ))}
+                                        </div>
+                                    </div>
+                                </div>
+                             );
+                        })}
+                    </div>
+                </div>
+              )}
           </div>
       </section>
 
@@ -385,76 +394,77 @@ export default async function Home() {
       </section>
 
       {/* News Section */}
-      <section className="container mx-auto px-4 md:px-6 max-w-6xl py-24 relative">
-          <div className="absolute left-0 top-20 w-24 h-24 bg-melon-light/40 rounded-full blur-2xl pointer-events-none -translate-x-1/2 z-0"></div>
+      {/* ★修正: 記事がある場合のみセクションを表示 */}
+      {news.length > 0 && (
+        <section className="container mx-auto px-4 md:px-6 max-w-6xl py-24 relative">
+            <div className="absolute left-0 top-20 w-24 h-24 bg-melon-light/40 rounded-full blur-2xl pointer-events-none -translate-x-1/2 z-0"></div>
 
-          <div className="flex flex-col lg:flex-row gap-16 relative z-10">
-              <div className="lg:w-3/4">
-                  <div className="flex items-end justify-between mb-10 border-b border-gray-100 pb-4 relative">
-                      <h2 className="text-xl md:text-2xl font-bold text-[#264653] relative z-10">新着記事</h2>
-                      <Link href="/articles" className="text-sm font-bold text-gray-500 hover:text-melon-dark transition-colors flex items-center gap-1 group relative z-10">View All <i className="fas fa-arrow-right text-xs group-hover:translate-x-1 transition-transform"></i></Link>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {news.map((article: any) => {
-                          const pTags = article.problem_tags ? (Array.isArray(article.problem_tags) ? article.problem_tags : [article.problem_tags]) : [];
-                          const sTags = article.solution_tags ? (Array.isArray(article.solution_tags) ? article.solution_tags : [article.solution_tags]) : [];
-                          
-                          // ★修正: カテゴリ名を自動判定
-                          const categoryName = getDisplayCategory(article, allTags);
-                          const categoryId = typeof article.category === 'object' ? article.category.id : null;
-                          
-                          return (
-                              <div key={article.id} className="group relative overflow-hidden rounded-2xl shadow-soft h-[320px] hover-lift block bg-white">
-                                  <Link href={`/article/${article.id}`} className="absolute inset-0 z-0 block" />
-                                  <div className="absolute inset-0 pointer-events-none">
-                                      <img src={article.thumnail?.url || article.thumbnail?.url || article.image?.url || article.eyecatch?.url || "https://placehold.jp/eeeeee/999999/600x375.png?text=No+Image"} alt={article.title} className="w-full h-full object-cover transition duration-700 group-hover:scale-105" />
-                                      <div className="absolute inset-0 bg-gradient-to-t from-[#264653] via-[#264653]/40 to-transparent"></div>
-                                  </div>
-                                  <div className="absolute top-4 left-4 z-20 pointer-events-none">
-                                      {categoryId ? (
-                                        <Link href={`/search?categoryId=${categoryId}&categoryName=${categoryName}`} className="bg-white text-[#264653] text-xs font-bold px-3 py-1 rounded-full shadow-sm hover:bg-melon-light transition-colors relative z-20 pointer-events-auto">{categoryName}</Link>
-                                      ) : (
-                                        <span className="bg-white text-[#264653] text-xs font-bold px-3 py-1 rounded-full shadow-sm">{categoryName}</span>
-                                      )}
-                                  </div>
-                                  <div className="absolute bottom-0 p-6 z-10 w-full pointer-events-none">
-                                      <time className="text-white text-xs font-en block mb-2 font-medium opacity-90 drop-shadow-sm">{formatDate(article.publishedAt || article.createdAt)}</time>
-                                      <h3 className="font-bold text-lg leading-snug mb-3 text-white drop-shadow-md line-clamp-2">{article.title}</h3>
-                                      
-                                      {/* ★修正: 課題・解決策タグをそれぞれ最大1つずつ表示 */}
-                                      <div className="flex flex-wrap gap-2 pointer-events-auto">
-                                          {pTags.slice(0, 1).map((tag: any, i: number) => (
-                                              <Link key={`p-${i}`} href={`/search?tag=${encodeURIComponent(getTagName(tag))}`} className="bg-white text-[#E76F51] text-xs font-bold px-2.5 py-1 rounded shadow-sm border border-red-100 hover:shadow-md transition-all relative z-20">
-                                                  {getTagName(tag)}
-                                              </Link>
-                                          ))}
-                                          {sTags.slice(0, 1).map((tag: any, i: number) => (
-                                              <Link key={`s-${i}`} href={`/search?tag=${encodeURIComponent(getTagName(tag))}`} className="bg-white text-melon-dark text-xs font-bold px-2.5 py-1 rounded shadow-sm border border-melon/20 hover:shadow-md transition-all relative z-20">
-                                                  {getTagName(tag)}
-                                              </Link>
-                                          ))}
-                                      </div>
-                                  </div>
-                              </div>
-                          );
-                      })}
-                  </div>
-              </div>
-              <aside className="lg:w-1/4">
-                  <div className="sticky top-24">
-                      <h3 className="font-bold text-[#264653] border-b border-gray-200 pb-2 mb-6 text-lg">人気の記事</h3>
-                      <div className="space-y-6">
-                           {[1,2,3].map(n => (
-                               <Link key={n} href="#" className="group flex gap-4 items-start">
-                                   <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center bg-[#264653] text-white font-en font-bold text-sm rounded-lg shadow-md group-hover:bg-melon-dark transition-colors">{n}</div>
-                                   <div><h4 className="text-sm font-bold leading-relaxed text-gray-800 group-hover:text-melon-dark transition-colors">ダミー記事タイトル：ECサイトのリニューアル時期について{n}</h4><span className="text-xs text-gray-400 font-en mt-1 block"><i className="far fa-eye mr-1"></i> {1234-n*100} views</span></div>
-                               </Link>
-                           ))}
-                      </div>
-                  </div>
-              </aside>
-          </div>
-      </section>
+            <div className="flex flex-col lg:flex-row gap-16 relative z-10">
+                <div className="lg:w-3/4">
+                    <div className="flex items-end justify-between mb-10 border-b border-gray-100 pb-4 relative">
+                        <h2 className="text-xl md:text-2xl font-bold text-[#264653] relative z-10">新着記事</h2>
+                        <Link href="/articles" className="text-sm font-bold text-gray-500 hover:text-melon-dark transition-colors flex items-center gap-1 group relative z-10">View All <i className="fas fa-arrow-right text-xs group-hover:translate-x-1 transition-transform"></i></Link>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {news.map((article: any) => {
+                            const pTags = article.problem_tags ? (Array.isArray(article.problem_tags) ? article.problem_tags : [article.problem_tags]) : [];
+                            const sTags = article.solution_tags ? (Array.isArray(article.solution_tags) ? article.solution_tags : [article.solution_tags]) : [];
+                            
+                            const categoryName = getDisplayCategory(article, allTags);
+                            const categoryId = typeof article.category === 'object' ? article.category.id : null;
+                            
+                            return (
+                                <div key={article.id} className="group relative overflow-hidden rounded-2xl shadow-soft h-[320px] hover-lift block bg-white">
+                                    <Link href={`/article/${article.id}`} className="absolute inset-0 z-0 block" />
+                                    <div className="absolute inset-0 pointer-events-none">
+                                        <img src={article.thumnail?.url || article.thumbnail?.url || article.image?.url || article.eyecatch?.url || "https://placehold.jp/eeeeee/999999/600x375.png?text=No+Image"} alt={article.title} className="w-full h-full object-cover transition duration-700 group-hover:scale-105" />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-[#264653] via-[#264653]/40 to-transparent"></div>
+                                    </div>
+                                    <div className="absolute top-4 left-4 z-20 pointer-events-none">
+                                        {categoryId ? (
+                                          <Link href={`/search?categoryId=${categoryId}&categoryName=${categoryName}`} className="bg-white text-[#264653] text-xs font-bold px-3 py-1 rounded-full shadow-sm hover:bg-melon-light transition-colors relative z-20 pointer-events-auto">{categoryName}</Link>
+                                        ) : (
+                                          <span className="bg-white text-[#264653] text-xs font-bold px-3 py-1 rounded-full shadow-sm">{categoryName}</span>
+                                        )}
+                                    </div>
+                                    <div className="absolute bottom-0 p-6 z-10 w-full pointer-events-none">
+                                        <time className="text-white text-xs font-en block mb-2 font-medium opacity-90 drop-shadow-sm">{formatDate(article.publishedAt || article.createdAt)}</time>
+                                        <h3 className="font-bold text-lg leading-snug mb-3 text-white drop-shadow-md line-clamp-2">{article.title}</h3>
+                                        
+                                        <div className="flex flex-wrap gap-2 pointer-events-auto">
+                                            {pTags.slice(0, 1).map((tag: any, i: number) => (
+                                                <Link key={`p-${i}`} href={`/search?tag=${encodeURIComponent(getTagName(tag))}`} className="bg-white text-[#E76F51] text-xs font-bold px-2.5 py-1 rounded shadow-sm border border-red-100 hover:shadow-md transition-all relative z-20">
+                                                    {getTagName(tag)}
+                                                </Link>
+                                            ))}
+                                            {sTags.slice(0, 1).map((tag: any, i: number) => (
+                                                <Link key={`s-${i}`} href={`/search?tag=${encodeURIComponent(getTagName(tag))}`} className="bg-white text-melon-dark text-xs font-bold px-2.5 py-1 rounded shadow-sm border border-melon/20 hover:shadow-md transition-all relative z-20">
+                                                    {getTagName(tag)}
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+                <aside className="lg:w-1/4">
+                    <div className="sticky top-24">
+                        <h3 className="font-bold text-[#264653] border-b border-gray-200 pb-2 mb-6 text-lg">人気の記事</h3>
+                        <div className="space-y-6">
+                             {[1,2,3].map(n => (
+                                 <Link key={n} href="#" className="group flex gap-4 items-start">
+                                     <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center bg-[#264653] text-white font-en font-bold text-sm rounded-lg shadow-md group-hover:bg-melon-dark transition-colors">{n}</div>
+                                     <div><h4 className="text-sm font-bold leading-relaxed text-gray-800 group-hover:text-melon-dark transition-colors">ダミー記事タイトル：ECサイトのリニューアル時期について{n}</h4><span className="text-xs text-gray-400 font-en mt-1 block"><i className="far fa-eye mr-1"></i> {1234-n*100} views</span></div>
+                                 </Link>
+                             ))}
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </section>
+      )}
 
       {/* CTA (変更なし) */}
       <section className="bg-gradient-to-br from-[#264653] to-[#2A9D8F] text-white py-24 relative overflow-hidden">

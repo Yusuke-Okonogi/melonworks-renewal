@@ -4,11 +4,20 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { client } from "@/libs/client";
+// ★追加: フォント読み込み
+import { Montserrat } from "next/font/google";
+
+// ★追加: フォント設定 (Login画面と統一)
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  weight: "900", 
+  display: "swap",
+});
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
-  const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false);
   const [tags, setTags] = useState<any[]>([]);
+  const [hasArticles, setHasArticles] = useState(false);
   const pathname = usePathname();
 
   const toggleMenu = () => setIsOpen(!isOpen);
@@ -16,22 +25,23 @@ export default function Header() {
 
   useEffect(() => {
     setIsOpen(false);
-    setIsMegaMenuOpen(false);
   }, [pathname]);
 
   useEffect(() => {
-    const fetchTags = async () => {
+    const fetchData = async () => {
       try {
-        const data = await client.get({ 
-            endpoint: "tags", 
-            queries: { limit: 20 } 
-        });
-        setTags(data.contents);
+        const [tagsData, articlesData] = await Promise.all([
+            client.get({ endpoint: "tags", queries: { limit: 20 } }),
+            client.get({ endpoint: "article", queries: { limit: 1 } })
+        ]);
+        
+        setTags(tagsData.contents);
+        setHasArticles(articlesData.contents.length > 0);
       } catch (e) {
-        console.error("Tags fetch failed", e);
+        console.error("Fetch failed", e);
       }
     };
-    fetchTags();
+    fetchData();
   }, []);
 
   const problemTags = tags.filter((t: any) => t.type?.includes("problem")).slice(0, 6);
@@ -57,60 +67,71 @@ export default function Header() {
       <header 
         className={`fixed top-0 left-0 w-full z-[95] h-14 md:h-16 flex items-center transition-all duration-300 ${
           isOpen 
-            ? 'bg-[#F9FAFB] border-b border-transparent' // ★修正: メニュー展開時は背景色をつけて透過を防ぐ
+            ? 'bg-[#F9FAFB] border-b border-transparent' 
             : 'bg-white/90 backdrop-blur-md border-b border-gray-100'
         }`}
       >
-        <div className="container mx-auto px-4 md:px-6 max-w-6xl h-14 md:h-16 flex items-center justify-between">
+        <div className="container mx-auto px-4 md:px-6 max-w-6xl h-14 md:h-16 flex items-center justify-between relative">
           
           {/* ロゴ */}
           <Link href="/" className="relative z-50 flex items-center gap-3 group opacity-90 hover:opacity-100 transition-opacity" onClick={closeMenu}>
             <img src="/logo-gr.png" alt="Melon Works" className="h-4 md:h-5 w-auto" />
           </Link>
 
+          {/* ★修正: SP用ヘッダーログインボタン (Montserrat反映) */}
+          <div className="md:hidden absolute right-4 top-1/2 -translate-y-1/2 z-50">
+             <Link 
+                href="/login" 
+                className="flex items-center gap-1.5 text-gray-400 hover:text-melon-dark transition-colors" 
+                onClick={closeMenu}
+             >
+                <i className="fas fa-sign-in-alt text-lg"></i>
+                <span className={`${montserrat.className} text-[10px] tracking-widest leading-none pb-[2px]`}>MELON BASE</span>
+             </Link>
+          </div>
+
           {/* PC Navigation */}
-          <nav className="hidden md:flex items-center gap-8 text-xs md:text-sm font-bold text-gray-500 font-en">
-            <Link href="/about" className="hover:text-melon-dark transition-colors relative group">会社案内</Link>
+          <nav className="hidden md:flex items-center gap-4 lg:gap-6 text-[11px] lg:text-xs font-bold text-gray-500 font-en">
+            
+            {services.map((s, i) => (
+                <Link key={i} href={s.path} className="hover:text-melon-dark transition-colors relative group whitespace-nowrap">
+                    {s.title}
+                </Link>
+            ))}
 
-            {/* PC Mega Menu */}
-            <div
-              className="relative group h-full flex items-center"
-              onMouseEnter={() => setIsMegaMenuOpen(true)}
-              onMouseLeave={() => setIsMegaMenuOpen(false)}
-            >
-              <Link href="/service" className="hover:text-melon-dark transition-colors relative group flex items-center gap-1 py-4">
-                サービス <i className={`fas fa-chevron-down text-[10px] transition-transform duration-300 ${isMegaMenuOpen ? "rotate-180" : ""}`}></i>
-              </Link>
-              <div className={`absolute top-full right-0 w-[520px] lg:left-1/2 lg:-translate-x-1/2 lg:right-auto lg:w-[600px] bg-white border border-gray-100 shadow-xl rounded-b-xl overflow-hidden transition-all duration-300 origin-top ${isMegaMenuOpen ? "opacity-100 visible max-h-[400px]" : "opacity-0 invisible max-h-0"}`}>
-                <div className="p-6 grid grid-cols-2 gap-4 bg-white">
-                    {services.map((s, i) => (
-                        <Link key={i} href={s.path} className="flex gap-4 p-3 rounded-lg hover:bg-melon-light/10 transition-colors group/item">
-                            <div className="w-10 h-10 bg-gray-50 rounded-lg flex items-center justify-center text-melon-dark text-lg group-hover/item:bg-melon-dark group-hover/item:text-white transition-colors flex-shrink-0"><i className={s.icon}></i></div>
-                            <div><h4 className="font-bold text-[#264653] text-sm mb-0.5">{s.title}</h4><p className="text-[10px] text-gray-400 leading-tight">詳しく見る</p></div>
-                        </Link>
-                    ))}
-                </div>
-              </div>
-            </div>
+            <Link href="/about" className="hover:text-melon-dark transition-colors relative group whitespace-nowrap">
+                会社案内
+            </Link>
 
-            <Link href="/articles" className="hover:text-melon-dark transition-colors relative group">事例</Link>
-            <Link href="/contact" className="bg-melon-dark text-white px-5 py-2 md:px-6 md:py-2 rounded-full hover:bg-melon hover:shadow-lg transition-all transform hover:-translate-y-0.5 text-[10px] md:text-xs tracking-wider">お問い合わせ</Link>
+            {hasArticles && (
+                <Link href="/articles" className="hover:text-melon-dark transition-colors relative group whitespace-nowrap">
+                    事例
+                </Link>
+            )}
+            
+            <Link href="/contact" className="bg-melon-dark text-white px-4 py-2 lg:px-5 lg:py-2 rounded-full hover:bg-melon hover:shadow-lg transition-all transform hover:-translate-y-0.5 tracking-wider whitespace-nowrap ml-2">
+                お問い合わせ
+            </Link>
+
+            {/* ★修正: PC用ログインボタン (Montserrat反映) */}
+            <Link href="/login" className="flex items-center gap-1.5 text-gray-400 hover:text-melon-dark transition-colors ml-2 pl-4 border-l border-gray-200 h-6">
+                <i className="fas fa-sign-in-alt text-lg"></i>
+                <span className={`${montserrat.className} hidden xl:inline text-[10px] pt-0.5 whitespace-nowrap tracking-widest`}>MELON BASE</span>
+            </Link>
           </nav>
         </div>
       </header>
 
-      {/* ▼▼▼ Mobile Menu Overlay ▼▼▼ */}
+      {/* ▼▼▼ Mobile Menu Overlay (変更なし) ▼▼▼ */}
       <div 
         className={`fixed inset-0 bg-[#F9FAFB] z-[90] overflow-y-auto transition-all duration-300 ${
             isOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'
         }`}
-        style={{ paddingTop: '64px' }} // ヘッダーの高さ分パディングを確保
+        style={{ paddingTop: '64px' }}
       >
-        {/* 背景装飾 */}
         <div className="fixed top-[-10%] right-[-10%] w-[80vw] h-[80vw] bg-melon-light/20 rounded-full blur-[80px] pointer-events-none"></div>
         <div className="fixed bottom-[-10%] left-[-10%] w-[60vw] h-[60vw] bg-[#264653]/5 rounded-full blur-[60px] pointer-events-none"></div>
 
-        {/* コンテンツコンテナ */}
         <div className="relative z-10 w-full max-w-md mx-auto px-6 pb-40 pt-6 space-y-10">
             
             {/* 1. SERVICE SECTION */}
@@ -120,7 +141,6 @@ export default function Header() {
                     <span className="text-xs font-bold font-en text-[#264653] tracking-widest">SERVICE</span>
                     <span className="h-[1px] flex-grow bg-[#264653] opacity-20"></span>
                 </div>
-                {/* ★修正: COMPANYと同じサイズ感のグリッドに変更 */}
                 <div className="grid grid-cols-2 gap-3">
                     {services.map((s, i) => (
                         <Link key={i} href={s.path} onClick={closeMenu} className="bg-white border border-gray-100 rounded-xl py-3 px-3 flex items-center justify-start gap-2 shadow-sm active:scale-95 transition-all">
@@ -142,7 +162,6 @@ export default function Header() {
                 </div>
                 
                 <div className="space-y-4">
-                    {/* Issues */}
                     <div>
                         <p className="text-[10px] font-bold text-gray-400 mb-2 pl-1">ISSUES</p>
                         <div className="flex flex-wrap gap-2">
@@ -153,7 +172,6 @@ export default function Header() {
                             ))}
                         </div>
                     </div>
-                    {/* Solutions */}
                     <div>
                         <p className="text-[10px] font-bold text-gray-400 mb-2 pl-1">SOLUTIONS</p>
                         <div className="flex flex-wrap gap-2">
@@ -183,15 +201,39 @@ export default function Header() {
                 </div>
             </section>
 
-            {/* CONTACT BUTTON */}
-            <Link 
-                href="/contact" 
-                onClick={closeMenu}
-                className="block w-full bg-gradient-to-r from-[#264653] to-[#2A9D8F] text-white rounded-2xl py-4 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl active:scale-95 transition-all duration-300"
-            >
-                <i className="far fa-envelope text-lg"></i>
-                <span className="font-bold text-base">お問い合わせ</span>
-            </Link>
+            {/* 事例 (Mobile) */}
+            {hasArticles && (
+                <Link 
+                    href="/articles" 
+                    onClick={closeMenu}
+                    className="block w-full bg-white border border-gray-100 rounded-2xl py-4 flex items-center justify-center gap-2 shadow-sm hover:shadow-md active:scale-95 transition-all duration-300 text-[#264653]"
+                >
+                    <i className="far fa-newspaper text-lg text-melon-dark"></i>
+                    <span className="font-bold text-base">事例</span>
+                </Link>
+            )}
+
+            {/* CONTACT & LOGIN (Mobile) */}
+            <div className="grid grid-cols-2 gap-3">
+                <Link 
+                    href="/contact" 
+                    onClick={closeMenu}
+                    className="bg-gradient-to-r from-[#264653] to-[#2A9D8F] text-white rounded-2xl py-4 flex flex-col items-center justify-center gap-1 shadow-lg hover:shadow-xl active:scale-95 transition-all duration-300"
+                >
+                    <i className="far fa-envelope text-lg"></i>
+                    <span className="font-bold text-xs">お問い合わせ</span>
+                </Link>
+
+                {/* ★修正: メニュー内ボタン (Montserrat反映) */}
+                <Link 
+                    href="/login" 
+                    onClick={closeMenu}
+                    className="bg-gray-800 text-white rounded-2xl py-4 flex flex-col items-center justify-center gap-1 shadow-md active:scale-95 transition-all duration-300 border border-gray-700"
+                >
+                    <i className="fas fa-sign-in-alt text-lg"></i>
+                    <span className={`${montserrat.className} text-xs tracking-widest`}>MELON BASE</span>
+                </Link>
+            </div>
 
         </div>
       </div>
