@@ -172,20 +172,19 @@ export default async function Home() {
           <div className="container mx-auto px-4 md:px-6 max-w-6xl relative z-10 h-full flex flex-col justify-center">
               <div className="w-full lg:w-6/12 text-left mb-8 lg:mb-12 relative z-20 pt-4 lg:pt-0">
                   <div className="flex items-center gap-3 mb-4 lg:mb-6">
-                      <span className="w-8 lg:w-12 h-[2px] bg-melon-dark"></span>
-                      <p className="text-melon-dark font-bold tracking-widest font-en text-sm uppercase">DX & Creative Partner</p>
+                      <p className="text-melon-dark font-bold tracking-widest font-en text-sm uppercase">IT & Creative Partner</p>
                   </div>
-                  <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold font-en leading-tight mb-4 lg:mb-6 text-[#264653] tracking-tight">Less is more</h1>
-                  <p className="text-gray-600 text-sm md:text-base leading-relaxed mb-6 font-medium max-w-lg">ありふれた情報・モノの中でシンプルに考え、<br />シンプルに行動。そして豊かに。</p>
+                  <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold font-en leading-tight mb-4 lg:mb-6 text-[#264653] tracking-tight">一緒につくって、一緒に回す。<br />現場に合った仕組みを。</h1>
+                  <p className="text-gray-600 text-sm md:text-base leading-relaxed mb-6 font-medium max-w-lg">つくる人、つかう人、対話を重ねて良いものを。<br />人が使いこなせる、あたたかみのある仕組みをつくります。</p>
                     <div className="flex flex-wrap gap-2 mb-8">
                       <Link href="/service/dx" className="bg-white border border-gray-200 text-gray-500 text-xs font-bold px-3 py-2 rounded-full shadow-sm flex items-center gap-1 hover:border-melon-dark hover:text-melon-dark transition-colors">
                           <i className="fas fa-shapes text-melon-dark/50"></i> 業務設計・DX支援
                       </Link>
                       <Link href="/service/web" className="bg-white border border-gray-200 text-gray-500 text-xs font-bold px-3 py-2 rounded-full shadow-sm flex items-center gap-1 hover:border-melon-dark hover:text-melon-dark transition-colors">
-                          <i className="fas fa-laptop-code text-melon-dark/50"></i> Web制作
+                          <i className="fas fa-laptop-code text-melon-dark/50"></i> Webサイト制作（ホームページ制作） / 運用
                       </Link>
                       <Link href="/service/ec" className="bg-white border border-gray-200 text-gray-500 text-xs font-bold px-3 py-2 rounded-full shadow-sm flex items-center gap-1 hover:border-melon-dark hover:text-melon-dark transition-colors">
-                          <i className="fas fa-store text-melon-dark/50"></i> EC構築
+                          <i className="fas fa-store text-melon-dark/50"></i> ECサイト構築 / 運用
                       </Link>
                       <Link href="/service/design" className="bg-white border border-gray-200 text-gray-500 text-xs font-bold px-3 py-2 rounded-full shadow-sm flex items-center gap-1 hover:border-melon-dark hover:text-melon-dark transition-colors">
                           <i className="fas fa-palette text-melon-dark/50"></i> デザイン制作
@@ -256,9 +255,9 @@ export default async function Home() {
               <div className="flex flex-col lg:flex-row gap-10 lg:gap-20 items-center">
                   <div className="lg:w-5/12">
                       <span className="text-melon-light font-bold tracking-widest font-en text-sm uppercase mb-4 block">HOW WE DO</span>
-                      <h2 className="text-2xl md:text-3xl font-bold leading-tight mb-6">一緒につくって、一緒に回す。<br />現場が止まらないDXを。</h2>
-                      <p className="text-gray-300 text-sm md:text-base leading-relaxed mb-6">つくる人、つかう人、対話を重ねて良いものを。<br />システムに使われるのではなく、人が使いこなせる「あたたかみのある」DXを実現します。</p>
-                      <Link href="/about" className="inline-flex items-center gap-3 text-white font-bold border-b border-melon-light pb-1 hover:text-melon-light transition-colors group">メロンワークスのMVVはこちら<i className="fas fa-arrow-right text-xs group-hover:translate-x-1 transition-transform"></i></Link>
+                      <h2 className="text-2xl md:text-3xl font-bold leading-tight mb-6">Less is more</h2>
+                      <p className="text-gray-300 text-sm md:text-base leading-relaxed mb-6">ありふれた情報・モノの中でシンプルに考え、<br />シンプルに行動。そして豊かに。</p>
+                      <Link href="/about" className="inline-flex items-center gap-3 text-white font-bold border-b border-melon-light pb-1 hover:text-melon-light transition-colors group">メロンワークスが大切にしている考え方<i className="fas fa-arrow-right text-xs group-hover:translate-x-1 transition-transform"></i></Link>
                   </div>
                   <div className="lg:w-7/12 w-full">
                       <div className="space-y-5">
