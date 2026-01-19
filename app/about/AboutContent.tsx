@@ -47,7 +47,7 @@ export default function AboutContent() {
       en: "Yusuke Okonogi",
       initial: "Y.O",
       role: "CEO / Director",
-      desc: "ディレクター兼フロントエンドエンジニア。"
+      desc: "ディレクター兼エンジニア。"
     },
     {
       name: "こばやし てつろう",
@@ -74,7 +74,7 @@ export default function AboutContent() {
       en: "Yasuko Uchiyama",
       initial: "Y.U",
       role: "Designer / Engineer",
-      desc: "デザイナー兼フロントエンドエンジニア"
+      desc: "デザイナー兼エンジニア"
     }
   ];
 
@@ -250,19 +250,6 @@ export default function AboutContent() {
                 </div>
               </Row>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="bg-gradient-to-br from-[#264653] to-[#2A9D8F] text-white py-24 relative overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white/10 to-transparent pointer-events-none"></div>
-        <div className="container mx-auto px-4 md:px-6 max-w-6xl text-center relative z-10">
-          <h2 className="text-2xl md:text-4xl font-bold mb-6">あなたのビジネスの「現場」を整えます。</h2>
-          <p className="text-white/80 mb-10 text-base md:text-lg max-w-xl mx-auto leading-relaxed">Web制作からシステム開発、日々の運用サポートまで。<br />まずは無料相談からお気軽にお問い合わせください。</p>
-          <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6">
-            <Link href="/contact" className="bg-white text-melon-dark font-bold py-4 px-10 rounded-full hover:bg-melon-dark hover:text-white hover:shadow-lg transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2 group"><i className="far fa-envelope group-hover:rotate-12 transition-transform"></i> お問い合わせ</Link>
-            <Link href="#" className="bg-transparent border border-white/50 text-white font-bold py-4 px-10 rounded-full hover:bg-white hover:text-melon-dark hover:border-white transition-all flex items-center justify-center gap-2"><i className="fas fa-download"></i> 資料ダウンロード</Link>
           </div>
         </div>
       </section>

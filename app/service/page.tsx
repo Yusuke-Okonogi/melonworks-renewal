@@ -104,13 +104,13 @@ export default async function ServiceIndexPage() {
                     </p>
                 </div>
                 
-                {/* サービスグリッド */}
-                <div className="overflow-hidden bg-gray-100 grid grid-cols-1 md:grid-cols-2 gap-px shadow-sm rounded-2xl relative z-10">
+                {/* サービスグリッド (★修正: トップページのデザインを踏襲) */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
                     {serviceItems.map((s, i) => (
-                        <Link key={i} href={s.href} className="group bg-white p-6 md:p-8 flex flex-col items-start hover:bg-melon-light/5 transition-colors duration-500 relative overflow-hidden">
+                        <Link key={i} href={s.href} className="group bg-gray-50 p-6 md:p-8 flex flex-col items-start hover:bg-white hover:border-melon-dark transition-all duration-300 relative overflow-hidden rounded-2xl border border-gray-200 shadow-md hover:shadow-lg hover:-translate-y-1">
                             
                             {/* 背景アイコン透かし */}
-                            <div className="absolute -bottom-6 -right-6 text-[120px] text-gray-50 group-hover:text-melon-light/10 group-hover:scale-110 group-hover:-rotate-12 transition-all duration-700 z-0 pointer-events-none">
+                            <div className="absolute -bottom-6 -right-6 text-[120px] text-gray-200 group-hover:text-melon-light/10 group-hover:scale-110 group-hover:-rotate-12 transition-all duration-700 z-0 pointer-events-none">
                                 <i className={`fas fa-${s.icon}`}></i>
                             </div>
 
@@ -124,7 +124,7 @@ export default async function ServiceIndexPage() {
                                         {s.title}
                                     </h3>
                                 </div>
-                                <div className="w-8 h-8 rounded-full border border-gray-100 flex items-center justify-center text-gray-400 group-hover:bg-melon-dark group-hover:text-white group-hover:border-melon-dark transition-all duration-300 bg-white">
+                                <div className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 group-hover:bg-melon-dark group-hover:text-white group-hover:border-melon-dark transition-all duration-300 bg-white shadow-sm">
                                     <i className="fas fa-arrow-right text-xs group-hover:-rotate-45 transition-transform duration-300"></i>
                                 </div>
                             </div>
@@ -137,7 +137,7 @@ export default async function ServiceIndexPage() {
                             </div>
                             
                             {/* 関連タグ */}
-                            <div className="pt-3 border-t border-gray-50 w-full relative z-10">
+                            <div className="pt-3 border-t border-gray-200 w-full relative z-10 mt-auto">
                                 <p className="text-xs text-gray-400 font-bold mb-2">関連タグ</p>
                                 <div className="flex flex-wrap gap-1.5">
                                     {/* ★修正: APIタグを表示 (型注釈追加) */}

@@ -124,7 +124,7 @@ export default async function Home() {
         id: "01",
         icon: "shapes", 
         title: "業務設計・DX支援", 
-        desc: "業務の流れや情報の分断を整理し、\n現場に無理のない仕組みを設計します。\nツール選定から運用定着まで、一緒に支援します。",
+        desc: "業務の流れや情報の分断を整理し、現場に無理のない仕組みを設計します。\nツール選定から運用定着まで、一緒に支援します。",
         pTags: getServiceTags("dx", "problem").slice(0, 3), 
         sTags: getServiceTags("dx", "solution").slice(0, 3),
         href: "/service/dx" 
@@ -133,7 +133,7 @@ export default async function Home() {
         id: "02",
         icon: "laptop-code", 
         title: "Webサイト制作", 
-        desc: "コーポレートサイトやLPを、\n更新・運用しやすい形で設計・制作。\n使われ続けるWebを前提に考えます。",
+        desc: "コーポレートサイトやLPを、更新・運用しやすい形で設計・制作。\n「使われ続ける」を前提に考えます。",
         pTags: getServiceTags("web", "problem").slice(0, 3),
         sTags: getServiceTags("web", "solution").slice(0, 3),
         href: "/service/web" 
@@ -142,7 +142,7 @@ export default async function Home() {
         id: "03",
         icon: "store", 
         title: "ECサイト構築・運用", 
-        desc: "ECサイトの構築から、\n在庫や業務との連動、日々の運用まで。\n現場とつながる「売る仕組み」をつくります。",
+        desc: "ECサイトの構築から、在庫や業務との連動、日々の運用まで。\n現場とつながる「売る仕組み」をつくります。",
         pTags: getServiceTags("ec", "problem").slice(0, 3),
         sTags: getServiceTags("ec", "solution").slice(0, 3),
         href: "/service/ec" 
@@ -151,7 +151,7 @@ export default async function Home() {
         id: "04",
         icon: "palette", 
         title: "デザイン制作", 
-        desc: "紙・Webを問わず、\n運用や更新を前提にしたデザインを制作。\n現場で使われることを大切にしています。",
+        desc: "紙・Web問わず、運用や更新を前提にしたデザイン制作。\n現場で使われることを大切にしています。",
         pTags: getServiceTags("design", "problem").slice(0, 3),
         sTags: getServiceTags("design", "solution").slice(0, 3),
         href: "/service/design" 
@@ -191,7 +191,6 @@ export default async function Home() {
                       </Link>
                   </div>
                   
-                  {/* ★修正: Pickupsがあればスライダー操作ボタンを表示 */}
                   {pickups.length > 0 && (
                     <div className="flex gap-3">
                         <button className="w-10 h-10 lg:w-12 lg:h-12 rounded-full border border-gray-200 bg-white flex items-center justify-center text-gray-600 hover:border-melon-dark hover:text-melon-dark transition-all shadow-sm"><i className="fas fa-chevron-left text-sm lg:text-base"></i></button>
@@ -200,7 +199,6 @@ export default async function Home() {
                   )}
               </div>
 
-              {/* ★修正: Pickups記事がある場合のみスライダーを表示 */}
               {pickups.length > 0 && (
                 <div className="w-full z-20">
                     <div className="flex gap-4 lg:gap-6 overflow-x-auto snap-x-mandatory scrollbar-hide py-2 px-1 pb-4">
@@ -292,16 +290,16 @@ export default async function Home() {
               <div className="text-center mb-16">
                   <span className="text-melon-dark font-bold tracking-widest font-en text-sm uppercase mb-3 block">SERVICE</span>
                   <h2 className="text-2xl md:text-3xl font-bold text-[#264653]">サービス</h2>
-                  <p className="text-gray-500 mt-4 text-sm max-w-2xl mx-auto">
-                      「つくる」だけでなく「動かす」まで。<br className="hidden md:inline" />
-                      現場目線で、ビジネスを加速させる4つのアプローチ。
+                  <p className="text-gray-500 mt-4 text-sm max-w-2xl mx-auto leading-relaxed">
+                      「つくる」だけでなく「動かす」まで。<br />
+                      現場目線でビジネスを加速する4つのアプローチ。
                   </p>
               </div>
               
-              <div className="overflow-hidden bg-gray-100 grid grid-cols-1 md:grid-cols-2 gap-px shadow-sm rounded-2xl relative z-10">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
                   {serviceItems.map((s, i) => (
-                      <Link key={i} href={s.href} className="group bg-white p-6 md:p-8 flex flex-col items-start hover:bg-melon-light/5 transition-colors duration-500 relative overflow-hidden">
-                          <div className="absolute -bottom-6 -right-6 text-[120px] text-gray-50 group-hover:text-melon-light/10 group-hover:scale-110 group-hover:-rotate-12 transition-all duration-700 z-0 pointer-events-none">
+                      <Link key={i} href={s.href} className="group bg-gray-50 p-6 md:p-8 flex flex-col items-start hover:bg-white hover:border-melon-dark transition-all duration-300 relative overflow-hidden rounded-2xl border border-gray-200 shadow-md hover:shadow-lg hover:-translate-y-1">
+                          <div className="absolute -bottom-6 -right-6 text-[120px] text-gray-200 group-hover:text-melon-light/10 group-hover:scale-110 group-hover:-rotate-12 transition-all duration-700 z-0 pointer-events-none">
                               <i className={`fas fa-${s.icon}`}></i>
                           </div>
 
@@ -314,7 +312,7 @@ export default async function Home() {
                                         {s.title}
                                     </h3>
                                 </div>
-                                <div className="w-8 h-8 rounded-full border border-gray-100 flex items-center justify-center text-gray-400 group-hover:bg-melon-dark group-hover:text-white group-hover:border-melon-dark transition-all duration-300 bg-white">
+                                <div className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 group-hover:bg-melon-dark group-hover:text-white group-hover:border-melon-dark transition-all duration-300 bg-white shadow-sm">
                                     <i className="fas fa-arrow-right text-xs group-hover:-rotate-45 transition-transform duration-300"></i>
                                 </div>
                           </div>
@@ -325,7 +323,7 @@ export default async function Home() {
                               </p>
                           </div>
                           
-                          <div className="pt-3 border-t border-gray-50 w-full relative z-10">
+                          <div className="pt-3 border-t border-gray-200 w-full relative z-10 mt-auto">
                                 <p className="text-xs text-gray-400 font-bold mb-2">関連タグ</p>
                                 <div className="flex flex-wrap gap-1.5">
                                     {s.pTags.map((tag: any, idx: number) => (
@@ -340,8 +338,6 @@ export default async function Home() {
                                     ))}
                                 </div>
                           </div>
-
-                          <div className="absolute bottom-0 left-0 w-full h-[3px] bg-melon-dark transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left z-20"></div>
                       </Link>
                   ))}
               </div>
@@ -465,18 +461,6 @@ export default async function Home() {
         </section>
       )}
 
-      {/* CTA (変更なし) */}
-      <section className="bg-gradient-to-br from-[#264653] to-[#2A9D8F] text-white py-24 relative overflow-hidden">
-           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white/10 to-transparent pointer-events-none"></div>
-          <div className="container mx-auto px-4 md:px-6 max-w-6xl text-center relative z-10">
-              <h2 className="text-2xl md:text-4xl font-bold mb-6">あなたのビジネスの「現場」を整えます。</h2>
-              <p className="text-white/80 mb-10 text-base md:text-lg max-w-xl mx-auto leading-relaxed">まずは無料相談からお気軽にお問い合わせください。</p>
-              <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6">
-                  <Link href="#" className="bg-white text-melon-dark font-bold py-4 px-10 rounded-full hover:bg-melon-dark hover:text-white hover:shadow-lg transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2 group"><i className="far fa-envelope group-hover:rotate-12 transition-transform"></i> お問い合わせ</Link>
-                  <Link href="#" className="bg-transparent border border-white/50 text-white font-bold py-4 px-10 rounded-full hover:bg-white hover:text-melon-dark hover:border-white transition-all flex items-center justify-center gap-2"><i className="fas fa-download"></i> 資料ダウンロード</Link>
-              </div>
-          </div>
-      </section>
     </main>
   );
 }
