@@ -4,10 +4,8 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { client } from "@/libs/client";
-// ★追加: フォント読み込み
 import { Montserrat } from "next/font/google";
 
-// ★追加: フォント設定 (Login画面と統一)
 const montserrat = Montserrat({
   subsets: ["latin"],
   weight: "900", 
@@ -18,16 +16,40 @@ export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [tags, setTags] = useState<any[]>([]);
   const [hasArticles, setHasArticles] = useState(false);
+  
+  // ★追加: メニューに触れたことがあるかどうかの状態
+  const [hasInteracted, setHasInteracted] = useState(false);
+  
   const pathname = usePathname();
 
-  const toggleMenu = () => setIsOpen(!isOpen);
+  // ★修正: メニュー開閉時に「触れた」フラグを立てる処理を追加
+  const toggleMenu = () => {
+    setIsOpen(!isOpen);
+    if (!hasInteracted) {
+        setHasInteracted(true);
+        // ブラウザを閉じても「触ったこと」を忘れないようにする場合、localStorageを使用
+        // 今回は「セッション中」だけ覚えておけば良い場合は sessionStorage
+        if (typeof window !== 'undefined') {
+            sessionStorage.setItem('menuInteracted', 'true');
+        }
+    }
+  };
+
   const closeMenu = () => setIsOpen(false);
 
   useEffect(() => {
     setIsOpen(false);
   }, [pathname]);
 
+  // ★追加: 初回ロード時に、過去に触ったことがあるかチェック
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+        const interacted = sessionStorage.getItem('menuInteracted');
+        if (interacted === 'true') {
+            setHasInteracted(true);
+        }
+    }
+
     const fetchData = async () => {
       try {
         const [tagsData, articlesData] = await Promise.all([
@@ -63,7 +85,6 @@ export default function Header() {
 
   return (
     <>
-      {/* Header (Desktop & Mobile Top Bar) */}
       <header 
         className={`fixed top-0 left-0 w-full z-[95] h-14 md:h-16 flex items-center transition-all duration-300 ${
           isOpen 
@@ -73,12 +94,10 @@ export default function Header() {
       >
         <div className="container mx-auto px-4 md:px-6 max-w-6xl h-14 md:h-16 flex items-center justify-between relative">
           
-          {/* ロゴ */}
           <Link href="/" className="relative z-50 flex items-center gap-3 group opacity-90 hover:opacity-100 transition-opacity" onClick={closeMenu}>
             <img src="/logo-gr.png" alt="Melon Works" className="h-4 md:h-5 w-auto" />
           </Link>
 
-          {/* ★修正: SP用ヘッダーログインボタン (Montserrat反映) */}
           <div className="md:hidden absolute right-4 top-1/2 -translate-y-1/2 z-50">
              <Link 
                 href="/login" 
@@ -90,30 +109,23 @@ export default function Header() {
              </Link>
           </div>
 
-          {/* PC Navigation */}
           <nav className="hidden md:flex items-center gap-4 lg:gap-6 text-[11px] lg:text-xs font-bold text-gray-500 font-en">
-            
             {services.map((s, i) => (
                 <Link key={i} href={s.path} className="hover:text-melon-dark transition-colors relative group whitespace-nowrap">
                     {s.title}
                 </Link>
             ))}
-
             <Link href="/about" className="hover:text-melon-dark transition-colors relative group whitespace-nowrap">
                 会社案内
             </Link>
-
             {hasArticles && (
                 <Link href="/articles" className="hover:text-melon-dark transition-colors relative group whitespace-nowrap">
                     事例
                 </Link>
             )}
-            
             <Link href="/contact" className="bg-melon-dark text-white px-4 py-2 lg:px-5 lg:py-2 rounded-full hover:bg-melon hover:shadow-lg transition-all transform hover:-translate-y-0.5 tracking-wider whitespace-nowrap ml-2">
                 お問い合わせ
             </Link>
-
-            {/* ★修正: PC用ログインボタン (Montserrat反映) */}
             <Link href="/login" className="flex items-center gap-1.5 text-gray-400 hover:text-melon-dark transition-colors ml-2 pl-4 border-l border-gray-200 h-6">
                 <i className="fas fa-sign-in-alt text-lg"></i>
                 <span className={`${montserrat.className} hidden xl:inline text-[10px] pt-0.5 whitespace-nowrap tracking-widest`}>MELON BASE</span>
@@ -122,7 +134,6 @@ export default function Header() {
         </div>
       </header>
 
-      {/* ▼▼▼ Mobile Menu Overlay (変更なし) ▼▼▼ */}
       <div 
         className={`fixed inset-0 bg-[#F9FAFB] z-[90] overflow-y-auto transition-all duration-300 ${
             isOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'
@@ -134,7 +145,6 @@ export default function Header() {
 
         <div className="relative z-10 w-full max-w-md mx-auto px-6 pb-40 pt-6 space-y-10">
             
-            {/* 1. SERVICE SECTION */}
             <section>
                 <div className="flex items-center gap-2 mb-4 opacity-60">
                     <span className="h-[1px] w-4 bg-[#264653]"></span>
@@ -153,7 +163,6 @@ export default function Header() {
                 </div>
             </section>
 
-            {/* 2. TAGS SECTION */}
             <section>
                 <div className="flex items-center gap-2 mb-4 opacity-60">
                     <span className="h-[1px] w-4 bg-[#264653]"></span>
@@ -185,7 +194,6 @@ export default function Header() {
                 </div>
             </section>
 
-            {/* 3. COMPANY SECTION */}
             <section>
                 <div className="flex items-center gap-2 mb-4 opacity-60">
                     <span className="h-[1px] w-4 bg-[#264653]"></span>
@@ -201,7 +209,6 @@ export default function Header() {
                 </div>
             </section>
 
-            {/* 事例 (Mobile) */}
             {hasArticles && (
                 <Link 
                     href="/articles" 
@@ -213,7 +220,6 @@ export default function Header() {
                 </Link>
             )}
 
-            {/* CONTACT & LOGIN (Mobile) */}
             <div className="grid grid-cols-2 gap-3">
                 <Link 
                     href="/contact" 
@@ -224,7 +230,6 @@ export default function Header() {
                     <span className="font-bold text-xs">お問い合わせ</span>
                 </Link>
 
-                {/* ★修正: メニュー内ボタン (Montserrat反映) */}
                 <Link 
                     href="/login" 
                     onClick={closeMenu}
@@ -238,16 +243,16 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Floating Menu Button */}
-      {/* ★修正: メロンをイメージした丸いボタンと波紋エフェクト */}
+      {/* Floating Menu Button (Updated) */}
       <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] md:hidden">
         <button 
             onClick={toggleMenu}
+            // ★修正: hasInteracted の値によってアニメーションクラスを切り替え
             className={`
                 relative z-50 w-16 h-16 rounded-full flex flex-col items-center justify-center gap-0.5 transition-all duration-300 border-2 border-white/50 backdrop-blur-sm shadow-[0_4px_20px_rgba(42,157,143,0.4)]
                 ${isOpen 
                     ? 'bg-gray-800 text-white hover:bg-gray-700'
-                    : 'bg-gradient-to-b from-[#4ADE80] to-[#2A9D8F] text-white animate-pulse-glow hover:scale-110'
+                    : `bg-gradient-to-b from-[#4ADE80] to-[#2A9D8F] text-white hover:scale-110 ${hasInteracted ? 'animate-pulse-glow' : 'animate-pulse-strong'}`
                 }
             `}
         >
