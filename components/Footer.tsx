@@ -64,7 +64,8 @@ export default async function Footer() {
 
 
         {/* ▼▼▼ Footer Information ▼▼▼ */}
-        <footer className="bg-white rounded-t-[40px] md:rounded-t-[60px] shadow-[0_-10px_40px_rgba(0,0,0,0.05)] relative overflow-hidden -mt-16 md:-mt-24 z-20 pt-16 md:pt-20 pb-12">
+        {/* ★修正: pb-12 -> pb-32 md:pb-12 (SP時に下部余白を広げることで、追従メニューと被らないように調整) */}
+        <footer className="bg-white rounded-t-[40px] md:rounded-t-[60px] shadow-[0_-10px_40px_rgba(0,0,0,0.05)] relative overflow-hidden -mt-16 md:-mt-24 z-20 pt-16 md:pt-20 pb-32 md:pb-12">
             
             {/* 背景装飾 */}
             <div className="absolute right-[-5%] bottom-[-20%] text-[200px] md:text-[300px] text-melon-light opacity-10 pointer-events-none rotate-12 z-0">

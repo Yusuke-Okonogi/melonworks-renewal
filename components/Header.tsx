@@ -239,19 +239,20 @@ export default function Header() {
       </div>
 
       {/* Floating Menu Button */}
+      {/* ★修正: メロンをイメージした丸いボタンと波紋エフェクト */}
       <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] md:hidden">
         <button 
             onClick={toggleMenu}
             className={`
-                relative z-50 px-6 py-2.5 rounded-full shadow-2xl flex items-center gap-2 transition-all duration-300 border border-white/20 backdrop-blur-sm
+                relative z-50 w-16 h-16 rounded-full flex flex-col items-center justify-center gap-0.5 transition-all duration-300 border-2 border-white/50 backdrop-blur-sm shadow-[0_4px_20px_rgba(42,157,143,0.4)]
                 ${isOpen 
                     ? 'bg-gray-800 text-white hover:bg-gray-700'
-                    : 'bg-gradient-to-r from-[#264653] to-[#2A9D8F] text-white hover:scale-105 animate-pulse-glow shadow-melon/30'
+                    : 'bg-gradient-to-b from-[#4ADE80] to-[#2A9D8F] text-white animate-pulse-glow hover:scale-110'
                 }
             `}
         >
-            <i className={`fas ${isOpen ? 'fa-times' : 'fa-bars'} text-sm w-4 text-center transition-transform duration-300 ${isOpen ? 'rotate-90' : 'rotate-0'}`}></i>
-            <span className="font-bold text-xs font-en tracking-wider w-10 text-center">
+            <i className={`fas ${isOpen ? 'fa-times' : 'fa-bars'} text-xl transition-transform duration-300 ${isOpen ? 'rotate-90' : 'rotate-0'}`}></i>
+            <span className="font-bold text-[9px] font-en tracking-widest leading-none">
                 {isOpen ? 'CLOSE' : 'MENU'}
             </span>
         </button>
