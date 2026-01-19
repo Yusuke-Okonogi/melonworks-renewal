@@ -165,7 +165,7 @@ export default async function Home() {
       <section className="bg-[#FAFAFA] relative lg:min-h-[calc(100vh-64px)] min-h-[600px] flex flex-col justify-center py-10 lg:py-20">
           <div className="absolute inset-0 z-0 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(38, 70, 83, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(38, 70, 83, 0.05) 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
           <div className="absolute right-[-40%] md:right-[-40%] lg:right-[-10%] top-30 lg:top-[10%] w-[90%] lg:w-[50%] h-[50%] lg:h-[80%] z-0 pointer-events-none">
-              <img src="/fv-illustration.png" alt="DX Illustration" className="w-full h-full object-contain object-right-top opacity-80 lg:opacity-80" />
+              <img src="/fv-illustration.png" alt="DX Illustration" className="w-full h-full object-contain object-right-top opacity-50 lg:opacity-80" />
           </div>
           <div className="absolute right-0 bottom-0 w-[600px] h-[600px] bg-melon-light/30 rounded-full blur-[120px] pointer-events-none translate-x-1/3 translate-y-1/3 z-0"></div>
 
