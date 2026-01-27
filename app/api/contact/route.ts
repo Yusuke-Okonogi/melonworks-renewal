@@ -4,7 +4,7 @@ import nodemailer from 'nodemailer';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { company, name, email, tel, type, message, bot_field } = body;
+    const { company, name, email, tel, type, message, bot_field, elapsedSeconds } = body;
 
     // 【サーバー側スパム対策】ハニーポットに値が入っていたら即終了
     if (bot_field) {
@@ -27,16 +27,16 @@ export async function POST(request: Request) {
       from: `"${name}様" <${process.env.SMTP_USER}>`, 
       to: "hello@melonworks.me", // 受信先
       replyTo: email, 
-      subject: `【HP問い合わせ】${name}様より`,
+      subject: `【MWコーポレート問い合わせ】${name}様より`,
       text: `
-ウェブサイトよりお問い合わせがありました。
+https://melonworks.me/ よりお問い合わせがありました。
 
 ■お名前: ${name}
 ■会社名: ${company || "なし"}
 ■メール: ${email}
 ■電話番号: ${tel || "なし"}
 ■ご相談内容: ${type}
-
+■入力時間: 約 ${elapsedSeconds} 秒
 ■詳細メッセージ:
 ${message}
       `,

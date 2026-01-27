@@ -53,7 +53,15 @@ export default function ContactContent() {
     setIsSubmitting(true);
 
     const formData = new FormData(e.currentTarget);
-    const data = Object.fromEntries(formData.entries());
+    const rawData = Object.fromEntries(formData.entries());
+
+    // ミリ秒を秒に変換（小数点以下は四捨五入などお好みで）
+    const elapsedSeconds = Math.round(elapsedTime / 1000); 
+    
+    const data:any = {
+      ...rawData,
+      elapsedSeconds: elapsedSeconds // 秒数を追加
+    };
 
     if (data.bot_field) {
       setIsSubmitting(false);
