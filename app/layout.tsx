@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { GoogleTagManager } from '@next/third-parties/google'
 
 // ▼▼▼ メタデータ共通設定 ▼▼▼
 export const metadata: Metadata = {
@@ -47,6 +48,7 @@ export default function RootLayout({
       </head>
 
       <body className="text-gray-600 font-sans antialiased">
+        <GoogleTagManager gtmId="GTM-T6W97XJP" />
         <Header />
         {children}
         <Footer />
