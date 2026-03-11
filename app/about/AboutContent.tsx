@@ -215,6 +215,10 @@ export default function AboutContent() {
                 <p className="text-gray-600">2018年4月</p>
               </Row>
 
+              <Row icon="fa-solid fa-shield-halved" title="SECURITY ACTION">
+                <p className="text-gray-600"><img src="/security_level1.png" alt="セキュリティアクション★1" className="w-20" /></p>
+              </Row>
+
               <Row icon="fas fa-briefcase" title="事業内容" isLast>
                 <div className="space-y-6">
                   <div>

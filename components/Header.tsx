@@ -81,6 +81,7 @@ export default function Header() {
     { name: "利用規約", path: "/terms" },
     { name: "プライバシーポリシー", path: "/privacy" },
     { name: "反社基本方針", path: "/antisocial" },
+    { name: "情報セキュリティ基本方針", path: "/security" },
   ];
 
   return (

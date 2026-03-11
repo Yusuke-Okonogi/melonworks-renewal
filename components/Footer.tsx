@@ -180,7 +180,8 @@ export default async function Footer() {
                                     { name: "お問い合わせ", path: "/contact" },
                                     { name: "利用規約", path: "/terms" },
                                     { name: "プライバシーポリシー", path: "/privacy" },
-                                    { name: "反社会的勢力に対する基本方針", path: "/antisocial" }
+                                    { name: "反社会的勢力に対する基本方針", path: "/antisocial" },
+                                    { name: "情報セキュリティ基本方針", path: "/security" }
                                 ].map((item, i) => (
                                     <li key={i}>
                                         <Link href={item.path} className="text-xs text-gray-500 hover:text-melon-dark transition-all flex items-center gap-2 group">
