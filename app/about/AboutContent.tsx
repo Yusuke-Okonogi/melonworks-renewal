@@ -216,7 +216,8 @@ export default function AboutContent() {
               </Row>
 
               <Row icon="fa-solid fa-shield-halved" title="SECURITY ACTION">
-                <p className="text-gray-600"><img src="/security_level1.png" alt="セキュリティアクション★1" className="w-20" /></p>
+                <div className="text-gray-600 flex"><img src="/security_level1.png" alt="セキュリティアクション★1" className="w-20" /><img src="/security_level2.png" alt="セキュリティアクション★2" className="w-20" /></div>
+                
               </Row>
 
               <Row icon="fas fa-briefcase" title="事業内容" isLast>
