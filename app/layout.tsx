@@ -12,6 +12,9 @@ export const metadata: Metadata = {
     default: "メロンワークス合同会社 | 群馬・東京のDX支援・Web制作",
   },
   description: "群馬県前橋市・東京都港区を拠点に、業務設計・DX支援、Webサイト制作、ECサイト構築を行うメロンワークス合同会社です。「やさしい価値」を届け、ビジネスの現場を整えます。",
+  verification: {
+    google: "R2_CXSzKuSIewb5e0cxJMK-F77JhizgT98PKYT8EJwA",
+  },
   openGraph: {
     title: "メロンワークス合同会社",
     description: "群馬・東京のDX支援・Web制作パートナー。現場に根ざした「使える」システムとデザインを提供します。",
@@ -40,6 +43,7 @@ export default function RootLayout({
   return (
     // ★修正: suppressHydrationWarning を追加して拡張機能によるミスマッチエラーを抑制
     <html lang="ja" suppressHydrationWarning={true}>
+      <GoogleTagManager gtmId="GTM-T6W97XJP" />
       <head>
         <link 
           rel="stylesheet" 
@@ -48,7 +52,7 @@ export default function RootLayout({
       </head>
 
       <body className="text-gray-600 font-sans antialiased">
-        <GoogleTagManager gtmId="GTM-T6W97XJP" />
+
         <Header />
         {children}
         <Footer />
