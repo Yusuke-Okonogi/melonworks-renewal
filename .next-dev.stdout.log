@@ -1,0 +1,18 @@
+
+> my-melon-app@0.1.0 dev
+> next dev
+
+▲ Next.js 16.1.1 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.12.4:3000
+- Environments: .env.local
+
+✓ Starting...
+Creating turbopack project { dir: 'C:\\dev\\melon\\my-melon-app', testMode: true }
+✓ Ready in 6.6s
+○ Compiling / ...
+ GET / 200 in 9.3s (compile: 8.5s, render: 835ms)
+ GET / 200 in 8.6s (compile: 7.9s, render: 690ms)
+ GET / 200 in 105ms (compile: 5ms, render: 100ms)
+ GET /service/dx 200 in 751ms (compile: 652ms, render: 100ms)
+ GET / 200 in 52ms (compile: 7ms, render: 45ms)
