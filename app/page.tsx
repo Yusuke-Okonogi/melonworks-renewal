@@ -356,7 +356,9 @@ export default async function Home() {
 
       {/* SEARCH */}
       <section className="bg-white py-24 border-y border-gray-100 relative overflow-hidden">
-          <div className="absolute left-0 top-0 w-[25%] z-0 pointer-events-none opacity-20 hidden lg:block"><img src="/light.png" alt="Solution Idea" className="w-full h-auto object-contain" /></div>
+          <div className="absolute left-0 top-0 w-[25%] z-0 pointer-events-none opacity-[0.16] hidden lg:block">
+              <img src="/how_we_do.png" alt="相談しながら課題を探す様子" className="w-full h-auto object-contain" />
+          </div>
           <div className="container mx-auto px-4 md:px-6 max-w-6xl relative z-10">
               <div className="text-center mb-10">
                    <span className="text-melon-dark font-bold tracking-widest font-en text-sm uppercase mb-2 block">FIND YOUR SOLUTION</span>
