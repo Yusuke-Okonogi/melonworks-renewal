@@ -89,7 +89,7 @@ export default function Header() {
       <header 
         className={`fixed top-0 left-0 w-full z-[95] h-14 md:h-16 flex items-center transition-all duration-300 ${
           isOpen 
-            ? 'bg-[#F9FAFB] border-b border-transparent' 
+            ? 'bg-white border-b border-gray-100 shadow-sm' 
             : 'bg-white/90 backdrop-blur-md border-b border-gray-100'
         }`}
       >
@@ -136,7 +136,7 @@ export default function Header() {
       </header>
 
       <div 
-        className={`fixed inset-0 bg-[#F9FAFB] z-[90] overflow-y-auto transition-all duration-300 ${
+        className={`fixed inset-0 bg-gradient-to-b from-[#E8F2F0] via-[#F1F7F5] to-[#E5F0EE] z-[90] overflow-y-auto transition-all duration-300 shadow-[inset_0_12px_30px_rgba(38,70,83,0.08)] ${
             isOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'
         }`}
         style={{ paddingTop: '64px' }}
@@ -154,7 +154,7 @@ export default function Header() {
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                     {services.map((s, i) => (
-                        <Link key={i} href={s.path} onClick={closeMenu} className="bg-white border border-gray-100 rounded-xl py-3 px-3 flex items-center justify-start gap-2 shadow-sm active:scale-95 transition-all">
+                        <Link key={i} href={s.path} onClick={closeMenu} className="bg-white/90 border border-[#2A9D8F]/15 rounded-xl py-3 px-3 flex items-center justify-start gap-2 shadow-sm active:scale-95 transition-all">
                             <div className="w-6 h-6 rounded-full bg-melon-light/20 flex items-center justify-center text-melon-dark text-xs flex-shrink-0">
                                 <i className={s.icon}></i>
                             </div>
@@ -203,7 +203,7 @@ export default function Header() {
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                     {companyLinks.map((item, i) => (
-                        <Link key={i} href={item.path} onClick={closeMenu} className="bg-white border border-gray-100 rounded-xl py-3 px-4 flex items-center justify-center shadow-sm active:scale-95 transition-all">
+                        <Link key={i} href={item.path} onClick={closeMenu} className="bg-white/90 border border-[#2A9D8F]/15 rounded-xl py-3 px-4 flex items-center justify-center shadow-sm active:scale-95 transition-all">
                             <span className="font-bold text-gray-500 text-xs">{item.name}</span>
                         </Link>
                     ))}

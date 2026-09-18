@@ -164,16 +164,24 @@ export default async function Home() {
       
       {/* FV Section */}
       <section className="bg-gradient-to-br from-white via-[#FCFDFD] to-[#F5F8F7] relative lg:min-h-[calc(100vh-64px)] min-h-[600px] flex flex-col justify-center py-10 lg:py-16">
+          <div
+            className="absolute inset-0 z-0 pointer-events-none"
+            style={{
+              backgroundImage: "linear-gradient(rgba(38, 70, 83, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(38, 70, 83, 0.05) 1px, transparent 1px)",
+              backgroundSize: "40px 40px",
+            }}
+            aria-hidden="true"
+          />
 
           <div className="container mx-auto px-4 md:px-6 max-w-6xl relative z-10 h-full flex flex-col justify-center">
               <div className="flex w-full flex-col items-center lg:flex-row lg:gap-2">
-              <div className="w-full lg:w-[46%] xl:w-[44%] lg:flex-none text-left mb-8 lg:mb-12 relative z-20 pt-4 lg:pt-0">
+              <div className="w-full lg:w-[46%] xl:w-[44%] lg:flex-none text-left mb-2 sm:mb-4 lg:mb-12 relative z-20 pt-4 lg:pt-0">
                   <div className="flex items-center gap-3 mb-4 lg:mb-6">
                       <p className="text-melon-dark font-bold tracking-widest font-en text-sm uppercase">IT & Creative Partner</p>
                   </div>
                   <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-[1.875rem] xl:text-4xl font-bold font-en leading-tight mb-4 lg:mb-6 text-[#264653] tracking-tight">一緒につくって、一緒に回す。<br />現場に合った仕組みを。</h1>
                   <p className="text-gray-600 text-sm md:text-base leading-relaxed mb-6 font-medium max-w-lg">つくる人、つかう人、対話を重ねて良いものを。<br />人が使いこなせる、あたたかみのある仕組みをつくります。</p>
-                    <div className="flex flex-wrap gap-2 mb-8">
+                    <div className="flex flex-wrap gap-2 mb-3 lg:mb-8">
                       <Link href="/service/dx" className="bg-white border border-gray-200 text-gray-500 text-xs font-bold px-3 py-2 rounded-full shadow-sm flex items-center gap-1 hover:border-melon-dark hover:text-melon-dark transition-colors">
                           <i className="fas fa-shapes text-melon-dark/50"></i> 業務設計・DX支援
                       </Link>
@@ -189,14 +197,14 @@ export default async function Home() {
                   </div>
                   
                   {pickups.length > 0 && (
-                    <div className="flex gap-3">
+                    <div className="hidden lg:flex gap-3">
                         <button className="w-10 h-10 lg:w-12 lg:h-12 rounded-full border border-gray-200 bg-white flex items-center justify-center text-gray-600 hover:border-melon-dark hover:text-melon-dark transition-all shadow-sm"><i className="fas fa-chevron-left text-sm lg:text-base"></i></button>
                         <button className="w-10 h-10 lg:w-12 lg:h-12 rounded-full border border-gray-200 bg-white flex items-center justify-center text-gray-600 hover:border-melon-dark hover:text-melon-dark transition-all shadow-sm"><i className="fas fa-chevron-right text-sm lg:text-base"></i></button>
                     </div>
                   )}
               </div>
 
-              <div className="w-full min-w-0 lg:flex-1 lg:-mr-10 xl:-mr-16">
+              <div className="w-full min-w-0 -mt-2 sm:mt-0 lg:flex-1 lg:-mr-10 xl:-mr-16">
                   <HeroVisual />
               </div>
               </div>
