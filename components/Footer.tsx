@@ -23,6 +23,8 @@ const services = [
 ];
 
 export default async function Footer() {
+  const currentYear = new Date().getFullYear();
+
   // タグデータを取得
   const allTags = await getTags();
 
@@ -109,6 +111,10 @@ export default async function Footer() {
                                     </p>
                                 </div>
                             </div>
+
+                            <p className="pt-2">
+                                営業時間 10:00 - 18:00（土日祝年末年始除く）
+                            </p>
                             
                             <Link href="/contact" className="inline-flex items-center gap-2 text-melon-dark hover:underline font-bold pt-2">
                                 <i className="far fa-envelope"></i> お問い合わせはこちら
@@ -199,7 +205,7 @@ export default async function Footer() {
                 {/* Copyright */}
                 <div className="border-t border-gray-100 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
                     <p className="text-[10px] text-gray-400 font-en tracking-wider">
-                        &copy; 2025 Melon Works LLC. All Rights Reserved.
+                        &copy; {currentYear} Melon Works LLC
                     </p>
                     <p className="text-[10px] text-gray-300 font-en hidden md:block">
                         Less is more.
